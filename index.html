@@ -764,6 +764,88 @@
   }
   .restart-btn:hover { color: var(--text); }
 
+  /* ── Consent Modal ── */
+  .consent-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+  }
+  .consent-modal {
+    background: white;
+    border-radius: var(--radius-3);
+    padding: 28px 24px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: var(--shadow-5);
+  }
+  .consent-modal h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .consent-body {
+    margin-bottom: 20px;
+  }
+  .consent-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  .consent-table th,
+  .consent-table td {
+    padding: 10px 12px;
+    border: 1px solid var(--gray-3);
+    text-align: left;
+    line-height: 1.5;
+  }
+  .consent-table th {
+    background: var(--gray-1);
+    font-weight: 600;
+    white-space: nowrap;
+    width: 100px;
+  }
+  .consent-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .consent-check-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    cursor: pointer;
+    line-height: 1.5;
+  }
+  .consent-check-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .consent-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .consent-actions .btn {
+    flex: 1;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  .consent-actions .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
   /* ── Similar Company Quote ── */
   .similar-quote {
     margin: 0 0 40px;
@@ -1281,7 +1363,7 @@
 
     <!-- 상단 소형 CTA -->
     <div id="topCta" style="text-align:center; margin-bottom:24px;">
-      <a class="btn btn-primary" href="https://docs.google.com/forms/u/4/d/e/1FAIpQLSdcI7LrS_zI3cSB4Z8W18ryIRjmmo4p-fAhNhwbjw7R4y1U3w/viewform?usp=dialog" target="_blank" rel="noopener" style="text-decoration:none; display:inline-block; padding:14px 32px; font-size:15px;">업무 시스템 기획/개발 전문가에게 무료 상담 받으세요</a>
+      <button class="btn btn-primary" onclick="openConsentModal()" style="display:inline-block; padding:14px 32px; font-size:15px;">업무 시스템 기획/개발 전문가에게 무료 상담 받으세요</button>
       <div style="font-size:12px; color:var(--text-muted); margin-top:8px;">진단 결과 기반 1:1 맞춤 설계 · 비용 무료</div>
     </div>
 
@@ -1398,7 +1480,7 @@
     <div class="cta-section">
       <h3>30분 무료 상담</h3>
       <p>진단 결과를 바탕으로, 우리 회사에 맞는<br>구체적인 다음 단계를 함께 설계해 드립니다.</p>
-      <a class="btn btn-primary" href="https://docs.google.com/forms/u/4/d/e/1FAIpQLSdcI7LrS_zI3cSB4Z8W18ryIRjmmo4p-fAhNhwbjw7R4y1U3w/viewform?usp=dialog" target="_blank" rel="noopener" style="text-decoration:none; display:block; max-width:320px; margin:0 auto;">무료 상담 신청하기</a>
+      <button class="btn btn-primary" onclick="openConsentModal()" style="display:block; max-width:320px; margin:0 auto;">무료 상담 신청하기</button>
     </div>
 
     <!-- Data Source -->
@@ -1475,6 +1557,28 @@
       <div class="logo">개발곰곰</div>
       <div class="tagline">AI 시대의 첫걸음, 업무 시스템부터</div>
       <a href="https://www.youtube.com/@develop_gomgom" target="_blank" rel="noopener" class="yt-btn">▶ 개발곰곰 유튜브</a>
+    </div>
+  </div>
+</div>
+
+<!-- 개인정보 수집·이용 동의 모달 -->
+<div id="consentModal" class="consent-overlay" style="display:none;">
+  <div class="consent-modal">
+    <h3>개인정보 수집·이용 동의</h3>
+    <div class="consent-body">
+      <table class="consent-table">
+        <tr><th>수집 항목</th><td>이메일, 업종, 직원 수, 진단 점수, 페인포인트, 수기 입력 시간</td></tr>
+        <tr><th>수집 목적</th><td>무료 상담 제공 및 맞춤 시스템 설계 안내</td></tr>
+        <tr><th>보유 기간</th><td>상담 완료 후 6개월 또는 동의 철회 시 즉시 파기</td></tr>
+      </table>
+      <p class="consent-note">동의를 거부할 권리가 있으며, 거부 시 상담 신청이 제한될 수 있습니다.</p>
+    </div>
+    <label class="consent-check-label">
+      <input type="checkbox" id="consentCheck"> 위 내용을 확인하였으며, 개인정보 수집·이용에 동의합니다.
+    </label>
+    <div class="consent-actions">
+      <button class="btn btn-secondary" onclick="closeConsentModal()">취소</button>
+      <button class="btn btn-primary" id="consentConfirmBtn" onclick="confirmConsent()" disabled>동의 후 상담 신청</button>
     </div>
   </div>
 </div>
@@ -1948,6 +2052,29 @@
 
     // Roadmap
     renderRoadmap(score);
+
+    // 백그라운드 Google Forms 전송 (UI 없이 자동)
+    submitToGoogleForms(score);
+  }
+
+  function submitToGoogleForms(score) {
+    try {
+      const FORM_URL = 'https://docs.google.com/forms/u/4/d/e/1FAIpQLSdcI7LrS_zI3cSB4Z8W18ryIRjmmo4p-fAhNhwbjw7R4y1U3w/formResponse';
+      const formData = new URLSearchParams();
+      formData.append('entry.680892542', industryNames[answers.q0] || '');   // 업종
+      formData.append('entry.272927794', String(score));                      // 점수
+      formData.append('entry.1275122278', (answers.q5 || []).join(', '));     // 페인포인트
+      formData.append('entry.2069373523', answers.q6 || '');                  // 우선 문제
+      formData.append('entry.1335563225', String(answers.q4));                // 직원 수
+      formData.append('entry.2058756715', String(answers.q2));                // 수기 입력 시간
+
+      fetch(FORM_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+      }).catch(function() {});
+    } catch(e) {}
   }
 
   function getColorValue(colorVar) {
@@ -2349,6 +2476,37 @@
     document.getElementById('roadmapSteps').innerHTML = roadmapHTML;
   }
 
+
+  // ── 개인정보 동의 모달 ──
+  const FORM_LINK = 'https://docs.google.com/forms/u/4/d/e/1FAIpQLSdcI7LrS_zI3cSB4Z8W18ryIRjmmo4p-fAhNhwbjw7R4y1U3w/viewform?usp=dialog';
+
+  function openConsentModal() {
+    document.getElementById('consentModal').style.display = 'flex';
+    document.getElementById('consentCheck').checked = false;
+    document.getElementById('consentConfirmBtn').disabled = true;
+  }
+
+  function closeConsentModal() {
+    document.getElementById('consentModal').style.display = 'none';
+  }
+
+  document.addEventListener('change', function(e) {
+    if (e.target.id === 'consentCheck') {
+      document.getElementById('consentConfirmBtn').disabled = !e.target.checked;
+    }
+  });
+
+  function confirmConsent() {
+    window.open(FORM_LINK, '_blank', 'noopener');
+    closeConsentModal();
+  }
+
+  // 모달 바깥 클릭 시 닫기
+  document.addEventListener('click', function(e) {
+    if (e.target.id === 'consentModal') {
+      closeConsentModal();
+    }
+  });
 
   function copyLink() {
     const base = window.location.href.split('?')[0];
