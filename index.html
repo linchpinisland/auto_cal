@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 시대, 우리 회사 업무 시스템 진단 | 린치핀아일랜드</title>
+<link rel="stylesheet" href="https://unpkg.com/open-props"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  button, input, textarea, select { font: inherit; color: inherit; }
+
+  :root {
+    --navy: var(--gray-0);
+    --navy-light: var(--gray-1);
+    --accent: var(--blue-7);
+    --accent-hover: var(--blue-8);
+    --accent-glow: var(--blue-1);
+    --green: var(--green-7);
+    --yellow: var(--yellow-7);
+    --orange: var(--orange-7);
+    --red: var(--red-7);
+    --text: var(--gray-9);
+    --text-muted: var(--gray-6);
+    --card-bg: white;
+    --card-border: var(--gray-3);
+    --shadow-card: var(--shadow-2);
+    --shadow-hover: var(--shadow-3);
+    --radius-card: var(--radius-3);
+    --radius-btn: var(--radius-3);
+    --ease: var(--ease-3);
+  }
+
+  body {
+    font-family: 'Noto Sans KR', -apple-system, sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.7;
+    accent-color: var(--accent);
+  }
+  h1, h2, h3, h4 {
+    color: var(--text);
+  }
+
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .header .badge {
+    display: inline-block;
+    background: var(--accent-glow);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(74, 157, 255, 0.2);
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .header h1 .highlight {
+    color: var(--accent);
+  }
+  .header p {
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── Progress ── */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    transition: width 0.4s ease;
+    z-index: 100;
+  }
+
+  .step-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+  .step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.06);
+    transition: all 0.3s;
+  }
+  .step-dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--blue-4);
+  }
+  .step-dot.done {
+    background: var(--green);
+  }
+
+  /* ── Question Card ── */
+  .question-card {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+  .question-card.active {
+    display: block;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .q-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+  .q-desc {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  /* ── Options with Icons ── */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .option {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-card);
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: all 0.2s var(--ease);
+    position: relative;
+    box-shadow: var(--shadow-card);
+  }
+  .option:hover {
+    border-color: var(--blue-3);
+    background: var(--blue-1);
+    box-shadow: var(--shadow-hover);
+  }
+  .option.selected {
+    border-color: var(--accent);
+    background: var(--blue-1);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .option-label {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .option-detail {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .option-icon {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 24px;
+  }
+
+  /* ── Grid Options (for industry selection) ── */
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 480px) {
+    .options-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .option-grid {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-card);
+    padding: 18px 16px;
+    cursor: pointer;
+    transition: all 0.2s var(--ease);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow-card);
+  }
+  .option-grid:hover {
+    border-color: var(--blue-3);
+    background: var(--blue-1);
+    box-shadow: var(--shadow-hover);
+  }
+  .option-grid.selected {
+    border-color: var(--accent);
+    background: var(--blue-1);
+  }
+  .option-grid-icon {
+    font-size: 28px;
+  }
+  .option-grid-label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* ── Slider ── */
+  .slider-group {
+    margin-bottom: 32px;
+  }
+  .slider-value {
+    text-align: center;
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .slider-unit {
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.06);
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--blue-4);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 10px var(--blue-4);
+  }
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── Checklist ── */
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .check-item {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-card);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s var(--ease);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-card);
+  }
+  .check-item:hover {
+    border-color: var(--blue-3);
+  }
+  .check-item.checked {
+    border-color: var(--accent);
+    background: var(--blue-1);
+  }
+  .check-box {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 14px;
+  }
+  .check-item.checked .check-box {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .check-label {
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  /* ── Button ── */
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 36px;
+  }
+  .btn {
+    flex: 1;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-3);
+  }
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .btn-secondary {
+    background: rgba(0,0,0,0.03);
+    color: var(--text-muted);
+    border: 1px solid var(--card-border);
+  }
+  .btn-secondary:hover {
+    background: rgba(0,0,0,0.06);
+  }
+  /* ── 포커스 스타일 (접근성) ── */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .check-item:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--blue-3);
+  }
+  .option:focus-visible, .option-grid:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--blue-3);
+  }
+
+  .btn-hint {
+    font-size: 13px;
+    color: var(--orange);
+    text-align: center;
+    margin-top: 10px;
+    transition: opacity 0.3s;
+  }
+  .btn-hint.hidden { opacity: 0; pointer-events: none; }
+
+
+  /* ── 유틸리티 클래스 (인라인 스타일 대체) ── */
+  .text-center { text-align: center; }
+  .mt-16 { margin-top: 16px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-24 { margin-bottom: 24px; }
+  .mb-40 { margin-bottom: 40px; }
+  .saving-card { border-color: var(--accent); background: var(--blue-1); margin-top: 16px; margin-bottom: 16px; }
+  .saving-card .rc-value { color: var(--green); }
+  .three-year-card { border-color: var(--green-3); background: var(--green-1); margin-bottom: 16px; }
+  .three-year-card .rc-value { color: var(--green); }
+
+  /* ── Result ── */
+  .result-page { display: none; animation: fadeIn 0.6s ease; }
+  .result-page.active { display: block; }
+
+  .score-circle {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    margin: 0 auto 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .score-circle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(var(--score-color, var(--accent)) calc(var(--score-pct, 0) * 1%), var(--gray-2) 0);
+    mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #fff calc(100% - 5px));
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #fff calc(100% - 5px));
+    transition: --score-pct 1s ease;
+  }
+  @property --score-pct {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+  }
+  .score-circle .score-num {
+    font-size: 56px;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .score-circle .score-label {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .result-summary {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .result-summary h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+  .result-summary p {
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── Radar Chart ── */
+  .radar-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+  .radar-svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* ── Result Cards ── */
+  .result-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .result-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-card);
+    padding: 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .result-card .rc-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .result-card .rc-value {
+    font-size: 28px;
+    font-weight: 700;
+  }
+  .result-card .rc-detail {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+  .rc-value .won { font-size: 18px; font-weight: 400; }
+
+  .cost-row {
+    display: flex;
+    gap: 12px;
+  }
+  .cost-row .result-card { flex: 1; }
+
+  /* ── Benchmark Bar ── */
+  .benchmark-section {
+    margin-bottom: 40px;
+  }
+  .benchmark-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .benchmark-item {
+    margin-bottom: 24px;
+  }
+  .benchmark-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .benchmark-label-value {
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .benchmark-bar {
+    height: 8px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .benchmark-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+
+  /* ── Action Items ── */
+  .action-items {
+    margin-bottom: 40px;
+  }
+  .action-items h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .action-item {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-card);
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    border-left: 4px solid var(--accent);
+    box-shadow: var(--shadow-card);
+  }
+  .action-item-num {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .action-item-text {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── Roadmap ── */
+  .roadmap {
+    margin-bottom: 40px;
+  }
+  .roadmap h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .roadmap-step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .roadmap-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 42px;
+    bottom: -16px;
+    width: 2px;
+    background: rgba(0,0,0,0.06);
+  }
+  .rs-num {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .rs-content {
+    flex: 1;
+    padding-top: 6px;
+  }
+  .rs-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .rs-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 6px;
+  }
+  .rs-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .rs-highlight {
+    background: var(--blue-1);
+    border: 1px solid rgba(74, 157, 255, 0.2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  /* ── Share Section ── */
+  .share-section {
+    margin-bottom: 40px;
+    text-align: center;
+  }
+  .share-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .share-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .share-btn {
+    padding: 12px 20px;
+    border-radius: var(--radius-card);
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid var(--card-border);
+    cursor: pointer;
+    transition: all 0.2s var(--ease);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card-bg);
+    color: var(--text);
+    box-shadow: var(--shadow-2);
+  }
+  .share-btn:hover {
+    background: rgba(0,0,0,0.06);
+  }
+
+  /* ── CTA ── */
+  .cta-section {
+    text-align: center;
+    background: var(--blue-1);
+    border: 1px solid var(--blue-3);
+    border-radius: var(--radius-3);
+    padding: 32px 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .cta-section h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .cta-section p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .cta-section .btn {
+    max-width: 320px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding-top: 40px;
+    border-top: 1px solid var(--card-border);
+    margin-top: 60px;
+  }
+  .footer .logo {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .footer .tagline {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .footer .credentials {
+    font-size: 12px;
+    color: rgba(0,0,0,0.25);
+    line-height: 1.6;
+  }
+
+  .restart-btn {
+    display: inline-block;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 16px;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    background: none;
+    border: none;
+    font-family: inherit;
+  }
+  .restart-btn:hover { color: var(--text); }
+
+  /* ── Similar Company Quote ── */
+  .similar-quote {
+    margin: 0 0 40px;
+    padding: 16px 20px;
+    border-left: 3px solid var(--accent);
+    background: var(--blue-1);
+    border-radius: 0 10px 10px 0;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  .similar-quote-source {
+    font-size: 11px;
+    color: rgba(0,0,0,0.3);
+    margin-top: 8px;
+  }
+
+  /* ── Problem Diagnosis Section ── */
+  .problem-diagnosis { margin-bottom: 40px; }
+  .problem-diagnosis h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  .problem-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    border-left: 3px solid var(--orange);
+  }
+  .problem-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .problem-card-stat {
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .problem-card-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .problem-summary {
+    margin-top: 16px;
+    padding: 14px 18px;
+    background: rgba(249,115,22,0.06);
+    border: 1px solid rgba(249,115,22,0.15);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .problem-summary strong { color: var(--orange); }
+
+  /* ── Time Loss Visualization ── */
+  .time-loss {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 24px 20px;
+    background: rgba(239,68,68,0.04);
+    border: 1px solid rgba(239,68,68,0.12);
+    border-radius: 14px;
+  }
+  .time-loss-num {
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--red);
+    margin-bottom: 4px;
+  }
+  .time-loss-label {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .time-loss-sub {
+    font-size: 12px;
+    color: rgba(0,0,0,0.3);
+    margin-top: 8px;
+  }
+
+  /* ── Score Breakdown ── */
+  .score-breakdown { margin-bottom: 40px; }
+  .score-breakdown h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+  .breakdown-item { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .bd-label { font-size: 13px; color: var(--text); min-width: 130px; flex-shrink: 0; }
+  .bd-weight { color: var(--text-muted); font-size: 11px; }
+  .bd-bar-bg { flex: 1; height: 8px; background: rgba(0,0,0,0.06); border-radius: 4px; overflow: hidden; }
+  .bd-bar-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.8s ease; }
+  .bd-score { font-size: 13px; font-weight: 600; color: var(--accent); min-width: 40px; text-align: right; }
+  .bd-conclusion { margin-top: 16px; font-size: 13px; color: var(--accent); padding: 12px 16px; background: var(--blue-1); border-radius: 8px; border-left: 3px solid var(--accent); line-height: 1.6; }
+
+  /* ── Industry Cases ── */
+  .cases-section { margin-bottom: 40px; }
+  .cases-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  .case-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 16px 18px; margin-bottom: 10px; }
+  .case-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .case-meta { font-size: 12px; color: var(--accent); margin-bottom: 6px; font-weight: 500; }
+  .case-pain { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  /* ── Estimate Notice ── */
+  .estimate-notice {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    margin: 16px 0 40px;
+    line-height: 1.6;
+  }
+
+  /* ── Cost Source ── */
+  .cost-source {
+    font-size: 11px;
+    color: rgba(0,0,0,0.3);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  /* ── Data Source Section ── */
+  .data-source-section { margin-bottom: 40px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 28px 24px; }
+  .data-source-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; text-align: center; }
+  .source-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
+  .source-item { text-align: center; }
+  .source-num { font-size: 22px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .source-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .source-note { font-size: 11px; color: rgba(0,0,0,0.3); text-align: center; border-top: 1px solid var(--card-border); padding-top: 12px; }
+
+  /* ── Methodology Accordion ── */
+  .methodology-section { margin-bottom: 40px; text-align: center; }
+  .method-toggle { background: none; border: 1px solid var(--card-border); color: var(--text-muted); font-size: 14px; font-family: inherit; cursor: pointer; padding: 12px 20px; border-radius: 8px; transition: all 0.2s; }
+  .method-toggle:hover { color: var(--text); border-color: rgba(0,0,0,0.1); }
+  .method-content { text-align: left; margin-top: 16px; padding: 20px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; animation: fadeIn 0.3s ease; }
+  .method-step { margin-bottom: 16px; padding-left: 16px; border-left: 2px solid var(--blue-3); }
+  .method-step-num { font-size: 11px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .method-step-title { font-size: 14px; font-weight: 600; margin: 2px 0 4px; }
+  .method-step-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .method-disclaimer { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--card-border); }
+
+  /* ── Enhanced Footer ── */
+  .credentials-detail { margin-top: 16px; }
+  .cred-name { font-size: 14px; font-weight: 500; margin-bottom: 10px; }
+  .cred-items { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+  .cred-items span { font-size: 11px; color: var(--text-muted); background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.06); padding: 4px 10px; border-radius: 20px; }
+
+  /* ── Benchmark Enhancement ── */
+  .benchmark-detail { font-size: 11px; color: rgba(0,0,0,0.3); margin-top: 4px; }
+
+  /* ── Result Tabs ── */
+  .result-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 32px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+  }
+  .result-tab {
+    flex: 1;
+    padding: 14px 8px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--card-bg);
+    color: var(--text-muted);
+    border: none;
+    font-family: inherit;
+    transition: all 0.2s;
+    border-right: 1px solid var(--card-border);
+  }
+  .result-tab:last-child { border-right: none; }
+  .result-tab:hover { background: var(--blue-1); }
+  .result-tab.active {
+    background: var(--blue-2);
+    color: var(--accent);
+    box-shadow: inset 0 -2px 0 var(--accent);
+  }
+  .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+  .tab-panel.active { display: block; }
+
+  /* ── 태블릿 (768px 이하) ── */
+  @media (max-width: 768px) {
+    .container { padding: 32px 18px 70px; }
+    .header h1 { font-size: 26px; }
+    .q-title { font-size: 20px; }
+    .result-tab { font-size: 13px; padding: 12px 6px; }
+    .source-grid { gap: 12px; }
+    .roadmap-step { gap: 12px; }
+  }
+
+  /* ── 모바일 (480px 이하) ── */
+  @media (max-width: 480px) {
+    .container { padding: 24px 16px 60px; }
+    .header h1 { font-size: 24px; }
+    .q-title { font-size: 19px; }
+    .cost-row { flex-direction: column; }
+    .score-circle { width: 150px; height: 150px; }
+    .score-circle .score-num { font-size: 44px; }
+    .share-buttons { flex-direction: column; }
+    .share-btn { width: 100%; justify-content: center; }
+    .source-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .breakdown-item { flex-wrap: wrap; }
+    .bd-label { min-width: 100%; margin-bottom: 2px; }
+    .result-tab { font-size: 12px; padding: 11px 4px; }
+    .slider-labels { font-size: 11px; }
+    .option-icon { display: none; }
+    .radar-svg { width: 240px; height: 240px; }
+  }
+
+  /* ── 소형 모바일 (360px 이하) ── */
+  @media (max-width: 360px) {
+    .container { padding: 20px 12px 50px; }
+    .header h1 { font-size: 21px; }
+    .q-title { font-size: 17px; }
+    .result-tab { font-size: 11px; padding: 10px 3px; letter-spacing: -0.3px; }
+    .slider-labels span:nth-child(2), .slider-labels span:nth-child(4) { display: none; }
+    .option-label { font-size: 14px; }
+    .option-detail { font-size: 12px; }
+    .score-circle { width: 130px; height: 130px; }
+    .score-circle .score-num { font-size: 38px; }
+    .radar-svg { width: 200px; height: 200px; }
+    .rs-num { width: 32px; height: 32px; font-size: 12px; }
+  }
+</style>
+<!-- OG Meta Tags (SNS 공유 시 미리보기) -->
+<meta property="og:title" content="AI 시대, 우리 회사 업무 시스템 진단 | 린치핀아일랜드">
+<meta property="og:description" content="7개 질문에 답하면 업무 시스템 수준 + 숨은 비용 + AI 도입 로드맵을 바로 확인할 수 있습니다.">
+<meta property="og:type" content="website">
+<!-- Kakao JavaScript SDK -->
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" integrity="sha384-DKYJZ8NLiK8MN4/C5P2vDkVBziGMzIDKigPb0AX6QBuf/FRMEwNBEwEE9HCwNT87" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="진단 진행률"></div>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header" id="headerSection">
+    <div class="badge">7분 무료 진단</div>
+    <h1>AI가 일하려면,<br><span class="highlight">시스템이 먼저</span>입니다</h1>
+    <p>7개 질문에 답하면<br>우리 회사의 업무 시스템 수준 + 숨은 비용 + AI 도입까지의 로드맵을 바로 확인할 수 있습니다.</p>
+  </div>
+
+  <!-- Step Indicator -->
+  <div class="step-indicator" id="stepIndicator">
+    <div class="step-dot active" data-step="0"></div>
+    <div class="step-dot" data-step="1"></div>
+    <div class="step-dot" data-step="2"></div>
+    <div class="step-dot" data-step="3"></div>
+    <div class="step-dot" data-step="4"></div>
+    <div class="step-dot" data-step="5"></div>
+    <div class="step-dot" data-step="6"></div>
+    <div class="step-dot" data-step="7"></div>
+  </div>
+
+  <!-- Question 0: Industry -->
+  <div class="question-card active" id="q0">
+    <div class="q-number">QUESTION 01</div>
+    <div class="q-title">어떤 업종에서 일하고 계신가요?</div>
+    <div class="q-desc">현재 속한 업종을 선택해주세요.</div>
+    <div class="options-grid">
+      <div class="option-grid" data-q="0" data-v="manufacturing" onclick="selectOptionGrid(this)">
+        <div class="option-grid-icon">🏭</div>
+        <div class="option-grid-label">제조/생산</div>
+      </div>
+      <div class="option-grid" data-q="0" data-v="logistics" onclick="selectOptionGrid(this)">
+        <div class="option-grid-icon">🚚</div>
+        <div class="option-grid-label">물류/유통</div>
+      </div>
+      <div class="option-grid" data-q="0" data-v="service" onclick="selectOptionGrid(this)">
+        <div class="option-grid-icon">🍽️</div>
+        <div class="option-grid-label">서비스/외식</div>
+      </div>
+      <div class="option-grid" data-q="0" data-v="healthcare" onclick="selectOptionGrid(this)">
+        <div class="option-grid-icon">⚕️</div>
+        <div class="option-grid-label">의료/헬스</div>
+      </div>
+      <div class="option-grid" data-q="0" data-v="construction" onclick="selectOptionGrid(this)">
+        <div class="option-grid-icon">🏗️</div>
+        <div class="option-grid-label">건설/부동산</div>
+      </div>
+      <div class="option-grid" data-q="0" data-v="education" onclick="selectOptionGrid(this)">
+        <div class="option-grid-icon">📚</div>
+        <div class="option-grid-label">교육/학습</div>
+      </div>
+      <div class="option-grid" data-q="0" data-v="commerce" onclick="selectOptionGrid(this)">
+        <div class="option-grid-icon">🛒</div>
+        <div class="option-grid-label">커머스/쇼핑</div>
+      </div>
+      <div class="option-grid" data-q="0" data-v="finance" onclick="selectOptionGrid(this)">
+        <div class="option-grid-icon">💰</div>
+        <div class="option-grid-label">금융/핀테크</div>
+      </div>
+      <div class="option-grid" data-q="0" data-v="marketing" onclick="selectOptionGrid(this)">
+        <div class="option-grid-icon">📢</div>
+        <div class="option-grid-label">마케팅/광고</div>
+      </div>
+      <div class="option-grid" data-q="0" data-v="other" onclick="selectOptionGrid(this)">
+        <div class="option-grid-icon">📋</div>
+        <div class="option-grid-label">기타</div>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="nextBtn0" disabled onclick="nextStep(0)">다음</button>
+    </div>
+  </div>
+
+  <!-- Question 1: Data Management -->
+  <div class="question-card" id="q1">
+    <div class="q-number">QUESTION 02</div>
+    <div class="q-title">현재 데이터를 어떻게 관리하고 계신가요?</div>
+    <div class="q-desc">가장 가까운 것 하나를 선택해주세요.</div>
+    <div class="options">
+      <div class="option" data-q="1" data-v="1" onclick="selectOption(this)">
+        <div class="option-label">엑셀/스프레드시트가 주력</div>
+        <div class="option-detail">대부분의 업무를 엑셀 파일로 관리하고 있음</div>
+        <div class="option-icon">📊</div>
+      </div>
+      <div class="option" data-q="1" data-v="2" onclick="selectOption(this)">
+        <div class="option-label">엑셀 + 간단한 프로그램 혼용</div>
+        <div class="option-detail">일부는 시스템이 있지만 엑셀 병행이 많음</div>
+        <div class="option-icon">🔀</div>
+      </div>
+      <div class="option" data-q="1" data-v="3" onclick="selectOption(this)">
+        <div class="option-label">업무 시스템이 있음 (ERP/CRM 등)</div>
+        <div class="option-detail">시스템이 있지만 부족한 부분이 있음</div>
+        <div class="option-icon">🖥️</div>
+      </div>
+      <div class="option" data-q="1" data-v="4" onclick="selectOption(this)">
+        <div class="option-label">시스템이 잘 갖춰져 있음</div>
+        <div class="option-detail">대부분의 데이터가 시스템에서 관리됨</div>
+        <div class="option-icon">✅</div>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="prevStep(1)">이전</button>
+      <button class="btn btn-primary" id="nextBtn1" disabled onclick="nextStep(1)">다음</button>
+    </div>
+  </div>
+
+  <!-- Question 2: Weekly Manual Hours -->
+  <div class="question-card" id="q2">
+    <div class="q-number">QUESTION 03</div>
+    <div class="q-title">매주 수기로 데이터를 입력하는 시간은?</div>
+    <div class="q-desc">1인 기준으로, 복사/붙여넣기, 수동 입력, 취합 등을 모두 포함합니다.</div>
+    <div class="slider-group">
+      <div class="slider-value" id="sliderValue">5시간</div>
+      <div class="slider-unit">주당 수기 입력 시간</div>
+      <input type="range" id="hourSlider" min="1" max="40" value="5" step="1" oninput="updateSlider()" aria-label="주당 수기 입력 시간" aria-valuemin="1" aria-valuemax="40" aria-valuenow="5">
+      <div class="slider-labels">
+        <span>거의 없음</span>
+        <span>10시간</span>
+        <span>20시간</span>
+        <span>30시간</span>
+        <span>40시간+</span>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="prevStep(2)">이전</button>
+      <button class="btn btn-primary" onclick="nextStep(2)">다음</button>
+    </div>
+  </div>
+
+  <!-- Question 3: Data Scatter -->
+  <div class="question-card" id="q3">
+    <div class="q-number">QUESTION 04</div>
+    <div class="q-title">업무 데이터가 흩어져 있는 곳을 모두 골라주세요.</div>
+    <div class="q-desc">하나의 데이터(예: 매출, 재고, 고객)를 확인하려면 어디를 봐야 하나요?</div>
+    <div class="checklist">
+      <div class="check-item" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleCheck(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCheck(this);}" data-v="pc">
+        <div class="check-box">✓</div>
+        <div class="check-label">개인 PC (바탕화면, 내 문서 등)</div>
+      </div>
+      <div class="check-item" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleCheck(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCheck(this);}" data-v="shared">
+        <div class="check-box">✓</div>
+        <div class="check-label">공유 폴더 / NAS / Google Drive</div>
+      </div>
+      <div class="check-item" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleCheck(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCheck(this);}" data-v="email">
+        <div class="check-box">✓</div>
+        <div class="check-label">이메일 첨부파일</div>
+      </div>
+      <div class="check-item" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleCheck(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCheck(this);}" data-v="messenger">
+        <div class="check-box">✓</div>
+        <div class="check-label">카카오톡 / 메신저</div>
+      </div>
+      <div class="check-item" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleCheck(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCheck(this);}" data-v="erp">
+        <div class="check-box">✓</div>
+        <div class="check-label">ERP / 업무 시스템</div>
+      </div>
+      <div class="check-item" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleCheck(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCheck(this);}" data-v="paper">
+        <div class="check-box">✓</div>
+        <div class="check-label">종이 문서 / 수기 장부</div>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="prevStep(3)">이전</button>
+      <button class="btn btn-primary" id="nextBtn3" disabled onclick="nextStep(3)">다음</button>
+    </div>
+    <div class="btn-hint" id="hint3">1개 이상 선택해주세요</div>
+  </div>
+
+  <!-- Question 4: Employee Count -->
+  <div class="question-card" id="q4">
+    <div class="q-number">QUESTION 05</div>
+    <div class="q-title">현재 직원 수는 몇 명인가요?</div>
+    <div class="q-desc">정규직, 계약직 등 데이터를 다루는 인원 기준</div>
+    <div class="slider-group">
+      <div class="slider-value" id="empSliderValue">10명</div>
+      <div class="slider-unit">데이터 관련 업무 인원</div>
+      <input type="range" id="empSlider" min="1" max="100" value="10" step="1" oninput="updateEmpSlider()" aria-label="데이터 관련 업무 인원 수" aria-valuemin="1" aria-valuemax="100" aria-valuenow="10">
+      <div class="slider-labels">
+        <span>1명</span>
+        <span>25명</span>
+        <span>50명</span>
+        <span>75명</span>
+        <span>100명+</span>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="prevStep(4)">이전</button>
+      <button class="btn btn-primary" onclick="nextStep(4)">다음</button>
+    </div>
+  </div>
+
+  <!-- Question 5: Current Pain Level -->
+  <div class="question-card" id="q5">
+    <div class="q-number">QUESTION 06</div>
+    <div class="q-title">아래 항목 중 현재 겪고 있는 문제를 모두 골라주세요.</div>
+    <div class="q-desc">해당하는 모든 항목을 선택해주세요.</div>
+    <div class="checklist">
+      <div class="check-item" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleCheckPain(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCheckPain(this);}" data-v="duplicate">
+        <div class="check-box">✓</div>
+        <div class="check-label">같은 데이터를 여러 곳에 입력함</div>
+      </div>
+      <div class="check-item" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleCheckPain(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCheckPain(this);}" data-v="versions">
+        <div class="check-box">✓</div>
+        <div class="check-label">파일 버전이 헷갈림 (_최종_진짜최종)</div>
+      </div>
+      <div class="check-item" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleCheckPain(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCheckPain(this);}" data-v="overtime">
+        <div class="check-box">✓</div>
+        <div class="check-label">월말/분기 마감 때 야근함</div>
+      </div>
+      <div class="check-item" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleCheckPain(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCheckPain(this);}" data-v="mismatch">
+        <div class="check-box">✓</div>
+        <div class="check-label">숫자가 안 맞아서 확인 전화 돌림</div>
+      </div>
+      <div class="check-item" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleCheckPain(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCheckPain(this);}" data-v="silo">
+        <div class="check-box">✓</div>
+        <div class="check-label">담당자가 없으면 아무도 모르는 업무가 있음</div>
+      </div>
+      <div class="check-item" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleCheckPain(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCheckPain(this);}" data-v="realtime">
+        <div class="check-box">✓</div>
+        <div class="check-label">실시간 현황 파악이 안 됨</div>
+      </div>
+      <div class="check-item" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleCheckPain(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCheckPain(this);}" data-v="reporting">
+        <div class="check-box">✓</div>
+        <div class="check-label">보고서 만드는 데 반나절 이상 걸림</div>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="prevStep(5)">이전</button>
+      <button class="btn btn-primary" id="nextBtn5" disabled onclick="nextStep(5)">다음</button>
+    </div>
+    <div class="btn-hint" id="hint5">1개 이상 선택해주세요</div>
+  </div>
+
+  <!-- Question 6: Priority Problem -->
+  <div class="question-card" id="q6">
+    <div class="q-number">QUESTION 07</div>
+    <div class="q-title">가장 시급하게 해결하고 싶은 문제는?</div>
+    <div class="q-desc">하나만 선택해주세요.</div>
+    <div class="options">
+      <div class="option" data-q="6" data-v="manual" onclick="selectOption(this)">
+        <div class="option-label">매번 같은 걸 수동으로 입력/복사</div>
+        <div class="option-detail">반복적인 데이터 입력에 시간을 쓰고 있음</div>
+      </div>
+      <div class="option" data-q="6" data-v="scattered" onclick="selectOption(this)">
+        <div class="option-label">데이터가 여기저기 흩어져서 파악이 안 됨</div>
+        <div class="option-detail">현황을 보려면 여러 곳을 뒤져야 함</div>
+      </div>
+      <div class="option" data-q="6" data-v="errors" onclick="selectOption(this)">
+        <div class="option-label">숫자가 안 맞아서 확인/수정에 시간 소모</div>
+        <div class="option-detail">데이터 오류로 인한 재작업이 빈번함</div>
+      </div>
+      <div class="option" data-q="6" data-v="reporting" onclick="selectOption(this)">
+        <div class="option-label">보고서/현황 파악이 실시간으로 안 됨</div>
+        <div class="option-detail">리포트를 만들려면 수작업이 필요함</div>
+      </div>
+      <div class="option" data-q="6" data-v="ai" onclick="selectOption(this)">
+        <div class="option-label">AI를 도입하고 싶은데 뭐부터 해야 할지 모름</div>
+        <div class="option-detail">AI 시대에 뒤처지는 것 같은 불안감</div>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="prevStep(6)">이전</button>
+      <button class="btn btn-primary" id="nextBtn6" disabled onclick="showEmailGate()">결과 보기</button>
+    </div>
+  </div>
+
+
+  <!-- Result Page -->
+  <div class="result-page" id="resultPage">
+    <div class="result-summary">
+      <div class="score-circle" id="scoreCircle">
+        <div class="score-num" id="scoreNum">0</div>
+        <div class="score-label">업무 시스템 성숙도</div>
+      </div>
+      <h2 id="resultTitle"></h2>
+      <p id="resultDesc"></p>
+    </div>
+
+    <!-- Similar Company Quote -->
+    <div class="similar-quote" id="similarQuote"></div>
+
+    <!-- 상단 소형 CTA -->
+    <div id="topCta" style="text-align:center; margin-bottom:24px;">
+      <a class="btn btn-primary" href="https://docs.google.com/forms/u/4/d/e/1FAIpQLSdcI7LrS_zI3cSB4Z8W18ryIRjmmo4p-fAhNhwbjw7R4y1U3w/viewform?usp=dialog" target="_blank" rel="noopener" style="text-decoration:none; display:inline-block; padding:14px 32px; font-size:15px;">업무 시스템 기획/개발 전문가에게 무료 상담 받으세요</a>
+      <div style="font-size:12px; color:var(--text-muted); margin-top:8px;">진단 결과 기반 1:1 맞춤 설계 · 비용 무료</div>
+    </div>
+
+    <!-- ═══ 3단계 탭 UI ═══ -->
+    <div class="result-tabs" id="resultTabs" role="tablist" aria-label="진단 결과 탭">
+      <button class="result-tab active" role="tab" aria-selected="true" aria-controls="tabPanel0" id="tab0" onclick="switchTab(0)">진단 결과</button>
+      <button class="result-tab" role="tab" aria-selected="false" aria-controls="tabPanel1" id="tab1" onclick="switchTab(1)">비용 분석</button>
+      <button class="result-tab" role="tab" aria-selected="false" aria-controls="tabPanel2" id="tab2" onclick="switchTab(2)">액션플랜</button>
+    </div>
+
+    <!-- ── TAB 0: 진단 결과 ── -->
+    <div class="tab-panel active" id="tabPanel0" role="tabpanel" aria-labelledby="tab0">
+      <div class="time-loss" id="timeLoss"></div>
+
+      <div class="problem-diagnosis" id="problemDiagnosis">
+        <h3>당신이 겪고 있는 문제 진단</h3>
+        <div id="problemCards"></div>
+      </div>
+
+      <div style="margin-bottom:40px;">
+        <button class="method-toggle" id="detailToggle" onclick="toggleDetail()" style="width:100%;">▶ 점수 상세 분석 보기</button>
+        <div id="detailContent" style="display:none;">
+          <div class="radar-container" id="radarContainer" style="margin-top:24px; overflow:visible;"></div>
+          <div class="score-breakdown" id="scoreBreakdown">
+            <h3>점수 산출 과정</h3>
+            <div id="breakdownContent"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="benchmark-section" id="benchmarkSection"></div>
+
+      <div class="cases-section" id="casesSection" style="display:none;">
+        <h3>같은 업종의 실제 전환 사례</h3>
+        <div id="casesContent"></div>
+      </div>
+
+      <div style="text-align:center; margin-top:16px;">
+        <button class="btn btn-primary" onclick="switchTab(1)" style="max-width:320px;">숨은 비용 분석 보기 →</button>
+      </div>
+    </div>
+
+    <!-- ── TAB 1: 비용 분석 ── -->
+    <div class="tab-panel" id="tabPanel1" role="tabpanel" aria-labelledby="tab1">
+      <div class="cost-row">
+        <div class="result-card">
+          <div class="rc-label">현재 수기 작업 인건비 (연간 추정)</div>
+          <div class="rc-value" id="costManual">0<span class="won">만원</span></div>
+          <div class="rc-detail" id="costManualDetail"></div>
+          <div class="cost-source">고용노동부 고용형태별근로실태조사 2024.6 기준 전체근로자 시간당 25,156원 적용</div>
+        </div>
+        <div class="result-card">
+          <div class="rc-value" id="costError" style="color: var(--orange);">0<span class="won">만원</span></div>
+          <div class="rc-label">오류/재작업 비용 (연간 추정)</div>
+          <div class="rc-detail" id="costErrorDetail"></div>
+          <div class="cost-source">Panko(2008) 스프레드시트 오류율 1~5%, IBM/Gartner 1-10-100 규칙 적용</div>
+        </div>
+      </div>
+
+      <div class="result-card saving-card">
+        <div class="rc-label">시스템 전환 시 연간 절감 가능 금액</div>
+        <div class="rc-value" style="color: var(--green);" id="costSaving">0<span class="won">만원/년</span></div>
+        <div class="rc-detail" id="costSavingDetail"></div>
+        <div class="cost-source">McKinsey(2024) 디지털 전환 비용절감 25%, Deloitte Global Automation Survey 평균 32% 기반 보수적 적용</div>
+      </div>
+
+      <div class="result-card three-year-card">
+        <div class="rc-label">3년 누적 절감 금액</div>
+        <div class="rc-value" style="color: var(--green);" id="cost3Year">0<span class="won">만원</span></div>
+        <div class="rc-detail" id="cost3YearDetail"></div>
+      </div>
+
+      <div class="estimate-notice">※ 응답 기반 간이 추정치이며, 실제 비용은 업종·지역·업무 특성에 따라 다를 수 있습니다.</div>
+
+
+      <div style="text-align:center; margin-top:16px;">
+        <button class="btn btn-primary" onclick="switchTab(2)" style="max-width:320px;">맞춤 액션플랜 보기 →</button>
+      </div>
+    </div>
+
+    <!-- ── TAB 2: 액션플랜 ── -->
+    <div class="tab-panel" id="tabPanel2" role="tabpanel" aria-labelledby="tab2">
+      <div class="action-items" id="actionItems"></div>
+
+      <!-- AI Bridge Message -->
+      <div id="aiBridge" style="display:none; margin-bottom:40px; padding:20px 24px; background:linear-gradient(135deg, var(--blue-1), var(--green-1)); border:1px solid var(--blue-3); border-radius:14px; text-align:center;">
+        <div style="font-size:20px; margin-bottom:8px;">🤖 → 🏗️ → 🚀</div>
+        <div style="font-size:15px; font-weight:600; margin-bottom:8px; color:var(--text);">AI를 쓰려면, 먼저 이것이 필요합니다</div>
+        <div style="font-size:13px; color:var(--text-muted); line-height:1.7;">AI는 <strong style="color:var(--accent);">구조화된 데이터</strong> 위에서 작동합니다.<br>엑셀과 수작업에 묻힌 데이터를 시스템으로 옮기는 것이 AI 도입의 진짜 첫 단계입니다.</div>
+      </div>
+
+      <div class="roadmap">
+        <h3>추천 로드맵</h3>
+        <div id="roadmapSteps"></div>
+      </div>
+    </div>
+
+    <!-- ═══ 탭 외부: 공통 섹션들 ═══ -->
+
+    <!-- Share Section -->
+    <div class="share-section">
+      <h3>이 진단을 공유하세요</h3>
+      <div class="share-buttons">
+        <button class="share-btn" onclick="copyLink()">
+          <span>🔗</span> 링크 복사
+        </button>
+        <button class="share-btn" onclick="shareKakao()">
+          <span>💬</span> 카카오톡 공유
+        </button>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-section">
+      <h3>30분 무료 상담</h3>
+      <p>진단 결과를 바탕으로, 우리 회사에 맞는<br>구체적인 다음 단계를 함께 설계해 드립니다.</p>
+      <a class="btn btn-primary" href="https://docs.google.com/forms/u/4/d/e/1FAIpQLSdcI7LrS_zI3cSB4Z8W18ryIRjmmo4p-fAhNhwbjw7R4y1U3w/viewform?usp=dialog" target="_blank" rel="noopener" style="text-decoration:none; display:block; max-width:320px; margin:0 auto;">무료 상담 신청하기</a>
+    </div>
+
+    <!-- Data Source -->
+    <div class="data-source-section">
+      <h3>이 진단의 데이터 기반</h3>
+      <div class="source-grid">
+        <div class="source-item">
+          <div class="source-num">12,257건</div>
+          <div class="source-desc">국내 IT 외주 프로젝트<br>전수 분석</div>
+        </div>
+        <div class="source-item">
+          <div class="source-num">1,842건</div>
+          <div class="source-desc">엑셀→웹 전환 사례<br>상세 분석</div>
+        </div>
+        <div class="source-item">
+          <div class="source-num">9개 업종</div>
+          <div class="source-desc">업종별 교차 분석<br>(건수/평균예산)</div>
+        </div>
+        <div class="source-item">
+          <div class="source-num">26개 유형</div>
+          <div class="source-desc">고객 문제 상황<br>분류 체계</div>
+        </div>
+      </div>
+      <div class="source-note">시급 기준: 고용노동부 사업체노동력조사 (2024) | 분석: 린치핀아일랜드</div>
+    </div>
+
+    <!-- Methodology -->
+    <div class="methodology-section">
+      <button class="method-toggle" id="methodToggle" onclick="toggleMethodology()">▶ 이 진단은 어떻게 만들어졌나요?</button>
+      <div class="method-content" id="methodContent" style="display:none;">
+        <div class="method-step">
+          <div class="method-step-num">1단계</div>
+          <div class="method-step-title">데이터 수집</div>
+          <div class="method-step-desc">국내 IT 외주 플랫폼의 12,257건 프로젝트를 수집하고, 이 중 '엑셀→웹 전환' 관련 1,842건을 별도 분류했습니다.</div>
+        </div>
+        <div class="method-step">
+          <div class="method-step-num">2단계</div>
+          <div class="method-step-title">페인포인트 분류</div>
+          <div class="method-step-desc">26개 문제 유형으로 분류하고 (수기 입력, 데이터 분산, 오류 등), 9개 업종별 교차 분석을 수행했습니다.</div>
+        </div>
+        <div class="method-step">
+          <div class="method-step-num">3단계</div>
+          <div class="method-step-title">진단 모델 설계</div>
+          <div class="method-step-desc">5개 핵심 차원을 도출하고, 사례 데이터의 비용 상관관계로 각 차원의 가중치를 산출했습니다.</div>
+        </div>
+        <div class="method-step">
+          <div class="method-step-num">4단계</div>
+          <div class="method-step-title">비용 추정 모델</div>
+          <div class="method-step-desc">고용노동부 고용형태별근로실태조사(2024.6) 시간당 임금총액 기반 시급 산정, Panko(2008) 스프레드시트 오류율 연구 + IBM/Gartner 1-10-100 규칙 기반 오류 비용 모델, McKinsey·Deloitte 글로벌 자동화 조사 기반 절감률을 적용했습니다.</div>
+        </div>
+        <div class="method-step">
+          <div class="method-step-num">참고문헌</div>
+          <div class="method-step-title">학술 및 공공 출처</div>
+          <div class="method-step-desc" style="font-size:12px; line-height:1.8;">
+            · 고용노동부, 고용형태별근로실태조사 2024.6 — 시간당 임금총액 25,156원<br>
+            · Panko, R.R. (2008). Spreadsheet Errors: What We Know. What We Think We Can Do. — 셀 오류율 1~5%<br>
+            · PMC (2024). Error Rates of Data Processing Methods — 단일입력 SDE 오류율 0.29%<br>
+            · Labovitz & Chang (1992). 1-10-100 Rule — 데이터 품질 비용 모델<br>
+            · Gartner (2024). 데이터 품질 불량으로 기업 평균 연간 $12.9M 손실<br>
+            · McKinsey (2024). 디지털 전환 기대 비용절감 달성률 25%, EBIT 개선 목표 20%+<br>
+            · Deloitte Global Intelligent Automation Survey — 자동화 평균 비용절감 32%<br>
+            · 린치핀아일랜드 독자 분석: 12,257건 IT 프로젝트, 1,842건 엑셀→웹 전환 사례
+          </div>
+        </div>
+        <div class="method-disclaimer">※ 이 진단은 간이 자가진단이며, 정밀 진단을 위해서는 전문가 상담을 권장합니다.</div>
+      </div>
+    </div>
+
+    <div style="text-align: center;">
+      <button class="restart-btn" onclick="restart()">다시 진단하기</button>
+    </div>
+
+    <div class="footer">
+      <div class="logo">개발곰곰</div>
+      <div class="tagline">AI 시대의 첫걸음, 업무 시스템부터</div>      
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Kakao SDK 초기화 ──
+  // 플랫폼 > Web에서 서비스 도메인을 등록해야 합니다.
+  if (typeof Kakao !== 'undefined' && !Kakao.isInitialized()) {
+    Kakao.init('5c8e36ab9057086e9ae407dd44d357e8');
+  }
+
+  const answers = {
+    q0: null, // industry
+    q1: null, // data management
+    q2: 5,    // weekly manual hours
+    q3: [],   // data scatter
+    q4: 10,   // employee count
+    q5: [],   // pain points
+    q6: null  // priority problem
+  };
+
+  let currentStep = 0;
+  const totalSteps = 7;
+
+  // Q5 페인포인트별 실데이터 매칭 (painpoint_detail.txt + full_problem_analysis.txt 기반)
+  const painDataMap = {
+    duplicate: {
+      title: '같은 데이터를 여러 곳에 중복 입력',
+      cases: 180, avgBudget: 1427, category: 'A3',
+      desc: '수기 입력을 호소한 기업이 180곳입니다. 이 기업들의 평균 시스템 구축 비용은 1,427만원이었습니다.',
+      impact: '중복 입력은 데이터 오류의 주요 원인입니다. 한 곳에 입력하면 자동으로 연동되는 시스템으로 전환 시 수기 입력 시간을 크게 줄일 수 있습니다. (Deloitte: 자동화 도입 기업 평균 32% 비용 절감)'
+    },
+    versions: {
+      title: '파일 버전 혼란 (_최종_진짜최종)',
+      cases: 48, avgBudget: 1380, category: 'C5',
+      desc: '데이터 이력 추적이 안 되는 문제를 겪은 기업이 48곳입니다.',
+      impact: '버전 관리 실패는 잘못된 데이터로 의사결정을 하게 만듭니다. 변경 이력이 자동 기록되는 시스템이면 "어느 버전이 맞나?" 고민이 사라집니다.'
+    },
+    overtime: {
+      title: '월말/분기 마감 야근',
+      cases: 36, avgBudget: 1510, category: 'B2+F2',
+      desc: '마감 시 시간 소모와 수동 보고서 작성 문제를 겪은 기업이 36곳입니다.',
+      impact: '마감 야근의 주 원인은 분산된 데이터를 수동으로 취합하는 것입니다. 자동 집계 시스템 도입 시 마감 소요 시간을 크게 줄일 수 있습니다.'
+    },
+    mismatch: {
+      title: '숫자 불일치로 확인 전화',
+      cases: 42, avgBudget: 961, category: 'C1+C2',
+      desc: '데이터 누락이나 오류 문제를 겪은 기업이 42곳입니다. 평균 해결 비용은 961만원이었습니다.',
+      impact: '수기 입력의 평균 오류율은 1~5%입니다. 매출 1억 기준 500만원까지 보이지 않는 손실이 발생할 수 있습니다.'
+    },
+    silo: {
+      title: '담당자 부재 시 업무 마비',
+      cases: 17, avgBudget: 1650, category: 'D1',
+      desc: '특정인에게 업무가 집중된 문제를 겪은 기업이 17곳입니다.',
+      impact: '핵심 담당자 퇴사 시 업무 공백이 발생합니다. 시스템에 업무 프로세스가 기록되면, 누구나 이어서 처리할 수 있습니다.'
+    },
+    realtime: {
+      title: '실시간 현황 파악 불가',
+      cases: 1374, avgBudget: 1880, category: 'TOP패턴',
+      desc: '전체 12,257건 프로젝트 중 11.2%인 1,374곳이 이 문제를 겪고 있습니다.',
+      impact: '실시간 데이터 없이 의사결정을 하면, 이미 지나간 상황에 대응하게 됩니다. 대시보드 도입 기업의 평균 투자 비용은 1,880만원입니다.'
+    },
+    reporting: {
+      title: '보고서 만드는 데 반나절 이상',
+      cases: 90, avgBudget: 1393, category: 'F1~F3',
+      desc: '통계/리포팅 문제를 겪은 기업이 90곳입니다.',
+      impact: '보고서 작성 시간의 대부분은 데이터 수집과 정리에 소모됩니다. 자동 리포팅을 도입하면 보고서 생성 시간을 크게 단축할 수 있습니다. (McKinsey: 루틴 업무 시간 26~36% 회수 가능)'
+    }
+  };
+
+  // TOP 패턴 실데이터 (domain_cross.txt 기반)
+  const topPatterns = {
+    excel_to_system: { label: '엑셀/수작업→시스템화', cases: 709, avgBudget: 1733 },
+    scattered_to_unified: { label: '분산데이터→통합관리', cases: 3969, avgBudget: 1420 },
+    realtime_monitoring: { label: '실시간 모니터링 부재', cases: 1374, avgBudget: 1880 },
+    automation: { label: '반복 업무 자동화', cases: 566, avgBudget: 1536 },
+    data_decision: { label: '데이터 기반 의사결정', cases: 1390, avgBudget: 2127 }
+  };
+
+  // Industry benchmarks (12,257건 실데이터 기반)
+  const industryBenchmarks = {
+    manufacturing: { score: 38, projects: 520, avgBudget: 2479 },
+    logistics: { score: 35, projects: 453, avgBudget: 2878 },
+    service: { score: 25, projects: 2948, avgBudget: 1572 },
+    healthcare: { score: 30, projects: 342, avgBudget: 2139 },
+    construction: { score: 28, projects: 1989, avgBudget: 2245 },
+    education: { score: 40, projects: 646, avgBudget: 1919 },
+    commerce: { score: 30, projects: 2008, avgBudget: 2006 },
+    finance: { score: 45, projects: 411, avgBudget: 1661 },
+    marketing: { score: 42, projects: 501, avgBudget: 1619 },
+    other: { score: 32, projects: 982, avgBudget: 1773 }
+  };
+
+  const industryNames = {
+    manufacturing: '제조/생산',
+    logistics: '물류/유통',
+    service: '서비스/외식',
+    healthcare: '의료/헬스',
+    construction: '건설/부동산',
+    education: '교육/학습',
+    commerce: '커머스/쇼핑',
+    finance: '금융/핀테크',
+    marketing: '마케팅/광고',
+    other: '기타'
+  };
+
+  // 업종별 실제 전환 사례 (painpoint_detail.txt 기반)
+  const industryCases = {
+    manufacturing: [
+      { title: '품질 관리 보고서 생성 웹 시스템', budget: 8000, pain: '엑셀로 관리하던 품질 데이터를 시스템으로 전환' },
+      { title: '품질데이터 관리 및 성적서 발급 시스템', budget: 4000, pain: '엑셀 데이터 → 웹 기반 자동 성적서 발행' },
+      { title: '제품정보-주문-재고 관리 웹시스템', budget: 1400, pain: '엑셀 행/열 폭증으로 로딩 지연, 보안 취약' }
+    ],
+    logistics: [
+      { title: '자동차 수송 물류 배차관리 시스템', budget: 12000, pain: '수기 배차 → 자동 배차 전환' },
+      { title: '차량 탁송 웹 프로그램', budget: 3000, pain: '수기 입력 배차 → 시스템 자동화' },
+      { title: '무역 품목별 이력관리 업무 지원', budget: 3000, pain: '엑셀 업체별 리스트 → 웹 시스템 대체' }
+    ],
+    service: [
+      { title: '대리점/수수료 관리 ERP 구축', budget: 3500, pain: '엑셀 관리 → ERP 전환' },
+      { title: '매장별 매출 관리 시스템', budget: 2000, pain: '엑셀 수기 관리 → 실시간 매출 대시보드' },
+      { title: '예약/고객 관리 웹 시스템', budget: 1500, pain: '전화+수기 예약 → 온라인 통합 관리' }
+    ],
+    healthcare: [
+      { title: 'NMR 결과 분석 업무자동화 S/W', budget: 4000, pain: '수작업 분석 → AI+RPA 자동화' },
+      { title: '건강검진 결과 제공 솔루션', budget: 8000, pain: '수기 입력 → DB 연동 자동 리포트' },
+      { title: '환자 예약/접수 관리 시스템', budget: 3000, pain: '종이 접수 → 웹 기반 통합 관리' }
+    ],
+    construction: [
+      { title: 'LED 전광판 견적 웹 시스템', budget: 5000, pain: '엑셀 기반 → 웹 ERP 전환' },
+      { title: '감정평가서 PDF 정보 추출 솔루션', budget: 6000, pain: '수작업 데이터 입력 → AI 자동 추출' },
+      { title: '프로젝트 중심 사무 자동화 시스템', budget: 15000, pain: '엑셀 한계 → 커스텀 업무 시스템' }
+    ],
+    education: [
+      { title: '온라인 교육 콘텐츠 관리 시스템', budget: 5000, pain: '파일 분산 관리 → 통합 CMS' },
+      { title: '수강생 출결/정산 관리 시스템', budget: 3000, pain: '수기 출결+정산 → 자동화 시스템' },
+      { title: '강사/강좌 스케줄 관리 웹앱', budget: 2000, pain: '엑셀 스케줄 → 실시간 배정 시스템' }
+    ],
+    commerce: [
+      { title: '상품 재고/주문 관리 ERP', budget: 3500, pain: '엑셀 재고관리 → 실시간 재고 시스템' },
+      { title: '온라인 쇼핑몰 주문관리 시스템', budget: 5000, pain: '수작업 주문 처리 → 자동화 시스템' },
+      { title: '견적서 자동 생성 웹 시스템', budget: 2000, pain: '엑셀 견적서 → 온라인 자동 견적' }
+    ],
+    finance: [
+      { title: 'B2B 금융 신용평가 솔루션 MVP', budget: 5000, pain: '수동 데이터 분석 → 자동화 시스템' },
+      { title: '매출/지출 자동 분류 관리 시스템', budget: 3000, pain: '엑셀 수기 분류 → 자동 카테고리 매칭' },
+      { title: '거래처 정산 관리 웹 시스템', budget: 2500, pain: '수작업 정산 → 자동 대사/정산' }
+    ],
+    marketing: [
+      { title: '영업사원용 CRM 시스템 개발', budget: 5000, pain: '수기 고객관리 → CRM 자동화' },
+      { title: '캠페인 성과 분석 대시보드', budget: 3000, pain: '엑셀 캠페인 관리 → 통합 대시보드' },
+      { title: '리드 관리 및 자동 후속 시스템', budget: 2000, pain: '수작업 리드 추적 → 자동 알림/분류' }
+    ],
+    other: [
+      { title: '전시마케팅 성과분석 솔루션', budget: 2000, pain: '엑셀 기반 → 웹 솔루션 전환' },
+      { title: '문서 자동화 생성 프로그램', budget: 800, pain: '반복 수작업 → 자동 생성' },
+      { title: '홈택스/은행 스크래핑 기반 회계관리', budget: 5000, pain: '엑셀 기반 → 자동 보고서 출력' }
+    ]
+  };
+
+  function updateProgress() {
+    const pct = ((currentStep) / (totalSteps + 1)) * 100;
+    const bar = document.getElementById('progressBar');
+    bar.style.width = pct + '%';
+    bar.setAttribute('aria-valuenow', Math.round(pct));
+    document.querySelectorAll('.step-dot').forEach((dot, i) => {
+      dot.className = 'step-dot';
+      if (i < currentStep) dot.classList.add('done');
+      else if (i === currentStep) dot.classList.add('active');
+    });
+  }
+
+  function selectOptionGrid(el) {
+    const q = el.dataset.q;
+    el.parentElement.querySelectorAll('.option-grid').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    answers['q' + q] = el.dataset.v;
+    const btn = document.getElementById('nextBtn' + q);
+    if (btn) btn.disabled = false;
+  }
+
+  function selectOption(el) {
+    const q = el.dataset.q;
+    el.parentElement.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    answers['q' + q] = el.dataset.v;
+    const btn = document.getElementById('nextBtn' + q);
+    if (btn) btn.disabled = false;
+  }
+
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    el.setAttribute('aria-checked', el.classList.contains('checked'));
+    const checked = document.querySelectorAll('#q3 .check-item.checked');
+    answers.q3 = Array.from(checked).map(c => c.dataset.v);
+    const isEmpty = answers.q3.length === 0;
+    document.getElementById('nextBtn3').disabled = isEmpty;
+    document.getElementById('hint3').classList.toggle('hidden', !isEmpty);
+  }
+
+  function toggleCheckPain(el) {
+    el.classList.toggle('checked');
+    el.setAttribute('aria-checked', el.classList.contains('checked'));
+    const checked = document.querySelectorAll('#q5 .check-item.checked');
+    answers.q5 = Array.from(checked).map(c => c.dataset.v);
+    const isEmpty = answers.q5.length === 0;
+    document.getElementById('nextBtn5').disabled = isEmpty;
+    document.getElementById('hint5').classList.toggle('hidden', !isEmpty);
+  }
+
+  function updateSlider() {
+    const slider = document.getElementById('hourSlider');
+    const v = slider.value;
+    answers.q2 = parseInt(v);
+    document.getElementById('sliderValue').textContent = v + '시간';
+    slider.setAttribute('aria-valuenow', v);
+  }
+
+  function updateEmpSlider() {
+    const slider = document.getElementById('empSlider');
+    const v = slider.value;
+    answers.q4 = parseInt(v);
+    document.getElementById('empSliderValue').textContent = v + '명';
+    slider.setAttribute('aria-valuenow', v);
+  }
+
+  function nextStep(from) {
+    document.getElementById('q' + from).classList.remove('active');
+    currentStep = from + 1;
+    if (currentStep < totalSteps) {
+      document.getElementById('q' + currentStep).classList.add('active');
+    }
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function prevStep(to) {
+    const fromCard = document.querySelector('.question-card.active');
+    if (fromCard) fromCard.classList.remove('active');
+    currentStep = to - 1;
+    document.getElementById('q' + currentStep).classList.add('active');
+    updateProgress();
+    // 이전 단계의 nextBtn 상태를 답변 상태에 맞게 복원
+    restoreButtonState(currentStep);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function restoreButtonState(step) {
+    const btnId = 'nextBtn' + step;
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    switch(step) {
+      case 0: btn.disabled = !answers.q0; break;
+      case 1: btn.disabled = !answers.q1; break;
+      // q2, q4는 슬라이더이므로 항상 활성화 (disabled 없음)
+      case 3: btn.disabled = answers.q3.length === 0; break;
+      case 5: btn.disabled = answers.q5.length === 0; break;
+      case 6: btn.disabled = !answers.q6; break;
+    }
+  }
+
+  function showEmailGate() {
+    // 이메일 게이트를 결과 전에서 제거 → 결과 중간으로 통합 (전문가 합의)
+    // 결과를 바로 보여줌으로써 신뢰 구축 후 이메일 요청
+    document.getElementById('q6').classList.remove('active');
+    showResult();
+  }
+
+  function showResult() {
+    document.getElementById('stepIndicator').style.display = 'none';
+    document.getElementById('headerSection').style.display = 'none';
+
+    const calculations = calculateScore();
+    renderResult(calculations);
+
+    document.getElementById('resultPage').classList.add('active');
+    currentStep = totalSteps + 1;
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function calculateScore() {
+    const mgmt = parseInt(answers.q1);
+    const hours = answers.q2;
+    const scatter = answers.q3.length;
+    const emp = answers.q4;
+    const painCount = answers.q5.length;
+
+    // Scoring algorithm
+    let mgmtScore = mgmt * 25; // 25, 50, 75, 100
+
+    let hoursScore;
+    if (hours <= 2) hoursScore = 100;
+    else if (hours <= 5) hoursScore = 75;
+    else if (hours <= 10) hoursScore = 50;
+    else if (hours <= 20) hoursScore = 25;
+    else hoursScore = 10;
+
+    // ERP가 있으면 데이터 분산의 부정적 효과를 완화 (이미 구조화된 부분 존재)
+    const hasErp = answers.q3.includes('erp');
+    const effectiveScatter = hasErp ? Math.max(scatter - 1, 0) : scatter;
+    let scatterScore;
+    if (effectiveScatter <= 1) scatterScore = 100;
+    else if (effectiveScatter <= 2) scatterScore = 70;
+    else if (effectiveScatter <= 3) scatterScore = 45;
+    else if (effectiveScatter <= 4) scatterScore = 25;
+    else scatterScore = 10;
+
+    let painScore;
+    if (painCount <= 1) painScore = 90;
+    else if (painCount <= 2) painScore = 70;
+    else if (painCount <= 3) painScore = 50;
+    else if (painCount <= 5) painScore = 30;
+    else painScore = 10;
+
+    let empPenalty = 0;
+    if (mgmtScore < 50 && emp > 20) empPenalty = 15;
+
+    // AI/변화 의지 점수: Q6 응답 + 시스템 수준 조합으로 의미 있는 기여
+    let intentScore = 50; // 기본값
+    if (answers.q6 === 'ai') intentScore = mgmtScore >= 50 ? 90 : 70; // AI 관심 + 시스템 기반 있으면 높음
+    else if (answers.q6 === 'reporting') intentScore = 65; // 데이터 활용 의지
+    else if (answers.q6 === 'scattered') intentScore = 55; // 통합 필요 인식
+    else if (answers.q6 === 'errors') intentScore = 45; // 문제 인식 있으나 방어적
+    else if (answers.q6 === 'manual') intentScore = 40; // 기본적 자동화 니즈
+
+    let score = (
+      mgmtScore * 0.25 +
+      hoursScore * 0.20 +
+      scatterScore * 0.20 +
+      painScore * 0.15 +
+      (100 - empPenalty * 5) * 0.10 +
+      intentScore * 0.10
+    );
+    score = Math.min(Math.max(score, 5), 95);
+
+    // ── Cost calculation (레퍼런스 기반 보정) ──
+    // [R1] 시급: 고용노동부 고용형태별근로실태조사 2024.6 기준 전체근로자 시간당 임금총액 25,156원
+    const hourlyRate = 2.5; // 만원 (25,156원 → 간접비 미포함 보수적 적용)
+    const weeklyHours = hours;
+    const yearlyManualCost = Math.round(weeklyHours * 50 * hourlyRate);
+
+    // [R2] 오류율: Panko(2008) 스프레드시트 셀 오류율 1~5%, PMC 메타분석(2024) 단일입력 SDE 0.29%
+    //       데이터 분산도가 높을수록 재입력/복사 빈도 증가 → 오류 누적
+    //       baseErrorRate 상한 0.10 (10%) 설정 — Panko 실험실 환경 3.9% 평균의 2.5배
+    const baseErrorRate = Math.min(0.01 + (scatter * 0.015) + (painCount * 0.008), 0.10);
+
+    // [R3] 오류 비용: IBM/Gartner 1-10-100 규칙 (예방 $1, 발견 $10, 실패 $100)
+    //       수기 입력 비용 × 오류율 = 오류 발생 비용, × 10배 = 수정/재작업 비용 포함
+    const yearlyErrorCost = Math.round(yearlyManualCost * baseErrorRate * 10);
+
+    // [R4] 기회비용: 보고서 작성 시간 추정 (Deloitte: 수동 프로세스 기업은 30~40% 더 많은 노동시간 소모)
+    //       직원당 주 2시간 비효율 추정 (보수적) × 시급 × 50주
+    const oppCostPerEmp = Math.round(2 * 50 * hourlyRate); // 연간 1인당 약 250만원
+    const oppCost = Math.round(oppCostPerEmp * Math.min(emp, 50) * (answers.q6 === 'reporting' ? 0.5 : 0.3));
+
+    const totalHiddenCost = yearlyManualCost + yearlyErrorCost + oppCost;
+
+    // [R5] 절감률: McKinsey(2024) 디지털 전환 기대 비용절감 달성률 25%,
+    //       Deloitte Global Automation Survey 평균 비용절감 32%,
+    //       McKinsey 디지털 로드맵 EBIT 개선 목표 20%+
+    //       → 엑셀→시스템 전환 시 보수적 적용 (직접 자동화 효과만)
+    const savingRate = mgmt <= 1 ? 0.40 : mgmt === 2 ? 0.30 : mgmt === 3 ? 0.20 : 0.10;
+    const yearlySaving = Math.round(totalHiddenCost * savingRate);
+    const threeYearSaving = yearlySaving * 3;
+
+    return {
+      score: Math.round(score),
+      yearlyManualCost,
+      yearlyErrorCost,
+      oppCost,
+      yearlySaving,
+      threeYearSaving,
+      savingRate,
+      baseErrorRate,
+      mgmt,
+      scatter,
+      painCount,
+      hours,
+      emp,
+      intentScore
+    };
+  }
+
+  function renderResult(calc) {
+    const score = calc.score;
+    let scoreColor, title, desc;
+
+    if (score <= 30) {
+      scoreColor = 'var(--orange)';
+      title = '지금이 가장 극적인 변화를 만들 수 있는 시점입니다';
+      desc = '엑셀/수작업 중심으로 운영되고 있어, 시스템 전환 시 비용 절감 효과가 가장 큽니다. Deloitte 조사에 따르면 자동화 도입 기업은 평균 32%의 비용을 절감합니다. AI를 도입하려면 데이터가 시스템에 있어야 합니다 — 지금은 그 기반을 만드는 것이 가장 중요한 단계입니다.';
+    } else if (score <= 55) {
+      scoreColor = 'var(--yellow)';
+      title = '핵심 데이터를 한 곳에 모으면 AI 도입이 보입니다';
+      desc = '일부 시스템은 갖추고 있지만, 데이터가 분산되어 있어 통합만으로도 큰 개선이 가능합니다. 데이터가 한 곳에 모이면, 그 위에 AI를 올리는 것은 훨씬 쉬워집니다.';
+    } else if (score <= 75) {
+      scoreColor = 'var(--accent)';
+      title = 'AI 자동화를 바로 시작할 수 있는 좋은 위치입니다';
+      desc = '데이터 관리 기반이 갖춰져 있어, 부분적인 AI 자동화부터 시작하면 빠른 효과를 볼 수 있습니다. 리포팅 자동화, 알림 자동화부터 시작해보세요.';
+    } else {
+      scoreColor = 'var(--green)';
+      title = 'AI 에이전트를 적극 도입할 수 있는 단계입니다';
+      desc = '시스템 기반이 잘 갖춰져 있습니다. AI 에이전트를 연동하면 리포팅, 알림, 데이터 입력 등에서 즉각적인 효과를 볼 수 있습니다.';
+    }
+
+    // Animate score circle ring + glow
+    const scoreCircle = document.getElementById('scoreCircle');
+    scoreCircle.style.setProperty('--score-color', scoreColor);
+    scoreCircle.style.setProperty('--score-pct', '0');
+    scoreCircle.style.boxShadow = `0 0 40px ${getColorValue(scoreColor)}33`;
+    // conic-gradient 진행 애니메이션 트리거
+    requestAnimationFrame(() => { scoreCircle.style.setProperty('--score-pct', String(score)); });
+
+    const scoreNum = document.getElementById('scoreNum');
+    scoreNum.style.color = scoreColor;
+    animateNumber(scoreNum, score, '%');
+
+    document.getElementById('resultTitle').textContent = title;
+    document.getElementById('resultDesc').textContent = desc;
+
+    // Similar company quote (실데이터 기반으로 변경)
+    renderSimilarQuote(calc);
+
+    // Time loss visualization
+    renderTimeLoss(calc);
+
+    // Problem diagnosis (Q5 기반 실데이터 매칭)
+    renderProblemDiagnosis(calc);
+
+    // Costs with ranges (±15%)
+    const mLow = Math.round(calc.yearlyManualCost * 0.85);
+    const mHigh = Math.round(calc.yearlyManualCost * 1.15);
+    document.getElementById('costManual').innerHTML = `약 ${mLow.toLocaleString()} ~ ${mHigh.toLocaleString()}<span class="won">만원/년</span>`;
+    document.getElementById('costManualDetail').textContent = `주 ${calc.hours}시간 × 50주 × 시급 2.5만원 기준`;
+
+    const eLow = Math.round(calc.yearlyErrorCost * 0.85);
+    const eHigh = Math.round(calc.yearlyErrorCost * 1.15);
+    document.getElementById('costError').innerHTML = `약 ${eLow.toLocaleString()} ~ ${eHigh.toLocaleString()}<span class="won">만원/년</span>`;
+    document.getElementById('costErrorDetail').textContent = `오류율 ${(calc.baseErrorRate*100).toFixed(1)}% × 1-10-100 규칙 적용 (Panko·IBM/Gartner)`;
+
+    const sLow = Math.round(calc.yearlySaving * 0.85);
+    const sHigh = Math.round(calc.yearlySaving * 1.15);
+    document.getElementById('costSaving').innerHTML = `약 ${sLow.toLocaleString()} ~ ${sHigh.toLocaleString()}<span class="won">만원/년</span>`;
+    document.getElementById('costSavingDetail').textContent = `절감률 ${Math.round(calc.savingRate*100)}% 적용 (McKinsey·Deloitte 글로벌 조사 기반 보수적 추정)`;
+
+    const tLow = Math.round(calc.threeYearSaving * 0.85);
+    const tHigh = Math.round(calc.threeYearSaving * 1.15);
+    document.getElementById('cost3Year').innerHTML = `약 ${tLow.toLocaleString()} ~ ${tHigh.toLocaleString()}<span class="won">만원</span>`;
+    document.getElementById('cost3YearDetail').textContent = `연간 약 ${calc.yearlySaving.toLocaleString()}만원 × 3년`;
+
+    // Radar chart
+    renderRadarChart(calc);
+
+    // Score breakdown
+    renderScoreBreakdown(calc);
+
+    // Benchmark
+    renderBenchmark(score);
+
+    // AI Bridge message (점수 55 이하: 시스템 기반 부족 → AI 브릿지 필요)
+    if (score <= 55) {
+      document.getElementById('aiBridge').style.display = 'block';
+    }
+
+    // Industry cases
+    renderCases();
+
+    // Action items
+    renderActionItems(calc);
+
+    // Roadmap
+    renderRoadmap(score);
+  }
+
+  function getColorValue(colorVar) {
+    if (colorVar === 'var(--red)') return '#DC2626';
+    if (colorVar === 'var(--orange)') return '#EA580C';
+    if (colorVar === 'var(--yellow)') return '#D97706';
+    if (colorVar === 'var(--green)') return '#059669';
+    return '#2563EB';
+  }
+
+  function animateNumber(el, targetNum, suffix) {
+    let currentNum = 0;
+    const duration = 1000;
+    const startTime = Date.now();
+
+    function frame() {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      currentNum = Math.floor(targetNum * progress);
+
+      const formatted = suffix.includes('%') ? currentNum : currentNum.toLocaleString();
+      el.innerHTML = formatted + (suffix ? `<span class="won">${suffix}</span>` : '');
+
+      if (progress < 1) {
+        requestAnimationFrame(frame);
+      }
+    }
+    frame();
+  }
+
+  function renderRadarChart(calc) {
+    // Radar dimensions: 1. 데이터 구조화, 2. 자동화 수준, 3. 데이터 통합도, 4. 조직 준비도, 5. AI 도입 기반
+    const dimension1 = Math.min(100, calc.mgmt * 25);
+    const dimension2 = 100 - (calc.hours / 40 * 100);
+    const dimension3 = 100 - (calc.scatter / 6 * 100);
+    const dimension4 = Math.max(0, 100 - (calc.painCount / 7 * 100));
+    // dimension5: "변화 준비도" — Q6 기반 intentScore + 시스템 수준 반영
+    const intentVal = calc.intentScore || 50;
+    const dimension5 = Math.min(100, Math.round(intentVal * 0.6 + calc.mgmt * 25 * 0.4));
+
+    const dims = [dimension1, dimension2, dimension3, dimension4, dimension5];
+    const labels = ['데이터 구조화', '자동화 수준', '데이터 통합도', '조직 준비도', '변화 준비도'];
+
+    const size = 280;
+    const center = size / 2;
+    const radius = 80;
+    const sides = 5;
+    const angle = (Math.PI * 2) / sides;
+
+    let points = [];
+    for (let i = 0; i < sides; i++) {
+      const a = angle * i - Math.PI / 2;
+      const x = center + radius * Math.cos(a);
+      const y = center + radius * Math.sin(a);
+      points.push([x, y]);
+    }
+
+    let svgContent = `<svg class="radar-svg" viewBox="-10 -20 ${size+20} ${size+30}" width="300" height="310">`;
+
+    // Grid
+    for (let level = 1; level <= 5; level++) {
+      const levelRadius = (radius / 5) * level;
+      let gridPoints = [];
+      for (let i = 0; i < sides; i++) {
+        const a = angle * i - Math.PI / 2;
+        const x = center + levelRadius * Math.cos(a);
+        const y = center + levelRadius * Math.sin(a);
+        gridPoints.push([x, y]);
+      }
+      svgContent += `<polygon points="${gridPoints.map(p => p.join(',')).join(' ')}" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>`;
+    }
+
+    // Lines from center
+    for (let i = 0; i < sides; i++) {
+      svgContent += `<line x1="${center}" y1="${center}" x2="${points[i][0]}" y2="${points[i][1]}" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>`;
+    }
+
+    // Data polygon
+    let dataPoints = [];
+    for (let i = 0; i < sides; i++) {
+      const a = angle * i - Math.PI / 2;
+      const r = (radius / 100) * dims[i];
+      const x = center + r * Math.cos(a);
+      const y = center + r * Math.sin(a);
+      dataPoints.push([x, y]);
+    }
+    svgContent += `<polygon points="${dataPoints.map(p => p.join(',')).join(' ')}" fill="rgba(37,99,235,0.15)" stroke="rgba(37,99,235,0.7)" stroke-width="2"/>`;
+
+    // Labels
+    for (let i = 0; i < sides; i++) {
+      const a = angle * i - Math.PI / 2;
+      const x = center + (radius + 30) * Math.cos(a);
+      const y = center + (radius + 30) * Math.sin(a);
+      const score = Math.round(dims[i]);
+      svgContent += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" fill="#475569" font-size="12" font-family="'Noto Sans KR'">${labels[i]}<tspan x="${x}" dy="1.2em" font-size="14" fill="#2563EB" font-weight="700">${score}</tspan></text>`;
+    }
+
+    svgContent += `</svg>`;
+    document.getElementById('radarContainer').innerHTML = svgContent;
+  }
+
+  function renderSimilarQuote(calc) {
+    const industry = industryNames[answers.q0] || '해당';
+    // 실데이터 기반: 사용자 조건에 맞는 TOP 패턴 매칭
+    let matchedPattern = topPatterns.excel_to_system; // 기본
+    if (calc.mgmt <= 1) {
+      matchedPattern = topPatterns.excel_to_system;
+    } else if (calc.scatter >= 3) {
+      matchedPattern = topPatterns.scattered_to_unified;
+    } else if (answers.q6 === 'reporting') {
+      matchedPattern = topPatterns.data_decision;
+    } else if (answers.q6 === 'ai') {
+      matchedPattern = topPatterns.automation;
+    }
+
+    const bm = industryBenchmarks[answers.q0] || industryBenchmarks.other;
+    const text = `${industry} 업종에서 "${matchedPattern.label}" 문제를 해결한 프로젝트가 <strong>${matchedPattern.cases.toLocaleString()}건</strong>이며, 평균 투자 비용은 <strong>${matchedPattern.avgBudget.toLocaleString()}만원</strong>입니다. 시스템 전환 후 평균 ${Math.round(calc.savingRate * 100)}%의 업무 시간을 절감하고 있습니다.`;
+    document.getElementById('similarQuote').innerHTML = text + `<div class="similar-quote-source">— 12,257건 IT 프로젝트 분석 기준 (${industry} ${bm.projects.toLocaleString()}건 포함)</div>`;
+  }
+
+  function renderTimeLoss(calc) {
+    const yearlyHours = calc.hours * 50;
+    const workDays = Math.round(yearlyHours / 8 * 10) / 10;
+    const months = Math.round(workDays / 22 * 10) / 10;
+    let html = '';
+    if (yearlyHours > 0) {
+      html = `
+        <div class="time-loss-num">연간 ${yearlyHours.toLocaleString()}시간</div>
+        <div class="time-loss-label">현재 수기 입력에 사용하고 있는 시간입니다<br>근무일로 환산하면 <strong style="color:var(--red)">${workDays}일 = 약 ${months}개월</strong>에 해당합니다</div>
+        <div class="time-loss-sub">주 ${calc.hours}시간 × 50주 기준 (1인 기준, 팀 전체라면 더 많을 수 있음)</div>
+      `;
+    }
+    document.getElementById('timeLoss').innerHTML = html;
+  }
+
+  function renderProblemDiagnosis(calc) {
+    const selectedPains = answers.q5;
+    if (selectedPains.length === 0) {
+      document.getElementById('problemDiagnosis').style.display = 'none';
+      return;
+    }
+
+    let html = '';
+    let totalCases = 0;
+    selectedPains.forEach(key => {
+      const data = painDataMap[key];
+      if (!data) return;
+      totalCases += data.cases;
+      html += `
+        <div class="problem-card">
+          <div class="problem-card-title">${data.title}</div>
+          <div class="problem-card-stat">${data.cases.toLocaleString()}건의 유사 사례 | 평균 해결 비용 ${data.avgBudget.toLocaleString()}만원</div>
+          <div class="problem-card-desc">${data.impact}</div>
+        </div>
+      `;
+    });
+
+    // 문제 수 → 투자 규모 상관 데이터 (full_problem_analysis.txt 기반)
+    const budgetByProblemCount = {1: 834, 2: 1119, 3: 1344, 4: 1585, 5: 1904, 6: 2058, 7: 2208};
+    const estBudget = budgetByProblemCount[Math.min(selectedPains.length, 7)] || 1344;
+
+    html += `
+      <div class="problem-summary">
+        선택하신 <strong>${selectedPains.length}개 문제</strong>와 유사한 사례가 총 <strong>${totalCases.toLocaleString()}건</strong> 있습니다.
+        비슷한 수의 문제를 가진 기업들의 평균 시스템 구축 투자 비용은 <strong>${estBudget.toLocaleString()}만원</strong>입니다.
+      </div>
+    `;
+
+    document.getElementById('problemCards').innerHTML = html;
+  }
+
+  function renderScoreBreakdown(calc) {
+    const mgmtScore = Math.min(100, parseInt(calc.mgmt) * 25);
+    let hoursScore;
+    if (calc.hours <= 2) hoursScore = 100;
+    else if (calc.hours <= 5) hoursScore = 75;
+    else if (calc.hours <= 10) hoursScore = 50;
+    else if (calc.hours <= 20) hoursScore = 25;
+    else hoursScore = 10;
+
+    const hasErpBD = answers.q3.includes('erp');
+    const effectiveScatterBD = hasErpBD ? Math.max(calc.scatter - 1, 0) : calc.scatter;
+    let scatterScore;
+    if (effectiveScatterBD <= 1) scatterScore = 100;
+    else if (effectiveScatterBD <= 2) scatterScore = 70;
+    else if (effectiveScatterBD <= 3) scatterScore = 45;
+    else if (effectiveScatterBD <= 4) scatterScore = 25;
+    else scatterScore = 10;
+
+    let painScore;
+    if (calc.painCount <= 1) painScore = 90;
+    else if (calc.painCount <= 2) painScore = 70;
+    else if (calc.painCount <= 3) painScore = 50;
+    else if (calc.painCount <= 5) painScore = 30;
+    else painScore = 10;
+
+    const orgScore = calc.emp > 20 && mgmtScore < 50 ? 25 : 75;
+    const intentScoreBD = calc.intentScore || 50;
+
+    const dims = [
+      { label: '데이터 관리 수준', weight: '25%', score: mgmtScore },
+      { label: '수기 작업 비중', weight: '20%', score: hoursScore },
+      { label: '데이터 통합도', weight: '20%', score: scatterScore },
+      { label: '업무 고통 수준', weight: '15%', score: painScore },
+      { label: '조직 규모 보정', weight: '10%', score: orgScore },
+      { label: '변화 의지/AI 인식', weight: '10%', score: intentScoreBD }
+    ];
+
+    const lowest = dims.reduce((min, d) => d.score < min.score ? d : min, dims[0]);
+
+    let html = '';
+    dims.forEach(d => {
+      html += `<div class="breakdown-item">
+        <div class="bd-label">${d.label} <span class="bd-weight">(${d.weight})</span></div>
+        <div class="bd-bar-bg"><div class="bd-bar-fill" style="width: ${d.score}%"></div></div>
+        <div class="bd-score">${d.score}점</div>
+      </div>`;
+    });
+    html += `<div class="bd-conclusion">→ 가장 개선이 시급한 영역: <strong>${lowest.label}</strong> (${lowest.score}점)</div>`;
+
+    document.getElementById('breakdownContent').innerHTML = html;
+  }
+
+  function renderBenchmark(score) {
+    const industry = answers.q0;
+    const bm = industryBenchmarks[industry] || { projects: 982, avgBudget: 1773 };
+    const industryName = industryNames[industry] || '업종';
+
+    // [R6] 벤치마크: 임의 "업종 평균 점수"를 제거하고, 실데이터(프로젝트 수/예산)만 표시
+    //      12,257건 위시켓 프로젝트 실데이터 기반
+    let benchmarkHTML = `
+      <h3>${industryName} 업종 시스템 전환 현황</h3>
+      <div class="benchmark-item">
+        <div class="benchmark-label">
+          <span>당신의 업무 시스템 성숙도</span>
+          <span class="benchmark-label-value">${score}점</span>
+        </div>
+        <div class="benchmark-bar">
+          <div class="benchmark-fill" style="width: ${score}%; background: var(--accent);"></div>
+        </div>
+      </div>
+      <div style="display:flex; gap:12px; margin-top:20px;">
+        <div class="result-card" style="flex:1; text-align:center;">
+          <div class="rc-label">같은 업종 전환 프로젝트</div>
+          <div class="rc-value" style="font-size:22px; color:var(--accent);">${bm.projects.toLocaleString()}<span class="won">건</span></div>
+          <div class="rc-detail">12,257건 중 ${industryName} 비중</div>
+        </div>
+        <div class="result-card" style="flex:1; text-align:center;">
+          <div class="rc-label">평균 시스템 구축 예산</div>
+          <div class="rc-value" style="font-size:22px; color:var(--accent);">${bm.avgBudget.toLocaleString()}<span class="won">만원</span></div>
+          <div class="rc-detail">엑셀→웹 전환 프로젝트 기준</div>
+        </div>
+      </div>
+      <div class="benchmark-detail" style="margin-top:12px; text-align:center;">12,257건 IT 외주 프로젝트 전수 분석 기반 (개발곰곰)</div>
+    `;
+
+    document.getElementById('benchmarkSection').innerHTML = benchmarkHTML;
+  }
+
+  function renderCases() {
+    const cases = industryCases[answers.q0] || industryCases.other;
+    const section = document.getElementById('casesSection');
+    let html = '';
+    cases.forEach(c => {
+      html += `<div class="case-card">
+        <div class="case-title">${c.title}</div>
+        <div class="case-meta">예산 ${c.budget.toLocaleString()}만원</div>
+        <div class="case-pain">${c.pain}</div>
+      </div>`;
+    });
+    document.getElementById('casesContent').innerHTML = html;
+    section.style.display = 'block';
+  }
+
+  function switchTab(idx) {
+    document.querySelectorAll('.result-tab').forEach((t, i) => {
+      t.classList.toggle('active', i === idx);
+      t.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+    });
+    document.querySelectorAll('.tab-panel').forEach((p, i) => {
+      p.classList.toggle('active', i === idx);
+    });
+    // 탭 전환 시 상단으로 스크롤 (탭 바 위치)
+    const tabs = document.getElementById('resultTabs');
+    if (tabs) tabs.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function toggleDetail() {
+    const content = document.getElementById('detailContent');
+    const toggle = document.getElementById('detailToggle');
+    if (content.style.display === 'none') {
+      content.style.display = 'block';
+      toggle.textContent = '▼ 점수 상세 분석 접기';
+    } else {
+      content.style.display = 'none';
+      toggle.textContent = '▶ 점수 상세 분석 보기';
+    }
+  }
+
+  function toggleMethodology() {
+    const content = document.getElementById('methodContent');
+    const toggle = document.getElementById('methodToggle');
+    if (content.style.display === 'none') {
+      content.style.display = 'block';
+      toggle.textContent = '▼ 이 진단은 어떻게 만들어졌나요?';
+    } else {
+      content.style.display = 'none';
+      toggle.textContent = '▶ 이 진단은 어떻게 만들어졌나요?';
+    }
+  }
+
+  function renderActionItems(calc) {
+    const items = [];
+
+    // Q6(가장 시급한 문제) 기반 맞춤 첫 번째 액션
+    const q6Actions = {
+      manual: '매일 반복하는 수기 입력 업무를 목록으로 만들어보세요. 가장 시간이 많이 드는 것부터 자동화 대상입니다.',
+      scattered: '데이터가 있는 모든 곳(PC, 공유폴더, 메일, 메신저 등)의 목록을 만들어보세요. 통합의 시작점입니다.',
+      errors: '최근 1개월간 데이터 오류로 재확인/수정한 건을 세어보세요. 오류 비용을 체감할 수 있습니다.',
+      reporting: '보고서 하나를 만드는 데 걸리는 시간을 측정해보세요. 데이터 수집-정리-작성 각 단계별로 나누면 자동화 지점이 보입니다.',
+      ai: '현재 시스템에서 가장 많이 쌓이는 데이터가 무엇인지 파악해보세요. AI는 데이터가 있는 곳에서 시작합니다.'
+    };
+    if (q6Actions[answers.q6]) {
+      items.push(q6Actions[answers.q6]);
+    }
+
+    if (calc.hours > 10 && answers.q6 !== 'manual') {
+      items.push('주간 수기 입력 업무 목록을 만들어보세요. 자동화 우선순위를 정하는 첫 걸음입니다.');
+    }
+
+    if (calc.scatter >= 3 && answers.q6 !== 'scattered') {
+      items.push('데이터가 있는 모든 곳의 목록을 만들어보세요. 통합의 시작점입니다.');
+    }
+
+    if (calc.score < 40 && calc.painCount >= 3) {
+      items.push('가장 불편한 업무 하나만 골라보세요. 그 하나를 시스템으로 바꾸는 것부터 시작합니다.');
+    }
+
+    // Fallback items
+    if (items.length === 0) {
+      items.push(
+        '현재 시스템의 자동화 가능 부분을 찾아보세요. 작은 개선들이 모여 큰 효과를 만듭니다.',
+        '팀원들과 현재 업무의 고통점을 공유하고 우선순위를 함께 정해보세요.'
+      );
+    }
+
+    let actionHTML = '<h3>지금 바로 할 수 있는 것</h3>';
+    items.slice(0, 3).forEach((item, idx) => {
+      actionHTML += `
+        <div class="action-item">
+          <div class="action-item-num">Step ${idx + 1}</div>
+          <div class="action-item-text">${item}</div>
+        </div>
+      `;
+    });
+
+    document.getElementById('actionItems').innerHTML = actionHTML;
+  }
+
+  function renderRoadmap(score) {
+    let steps = [];
+
+    if (score <= 30) {
+      steps = [
+        { n: '1', title: '데이터 구조화', desc: '엑셀 데이터를 웹 기반 시스템으로 이전합니다. 입력 폼, 권한 관리, 변경 이력이 자동으로 관리됩니다.', highlight: '지금 가장 필요한 단계', duration: '3-4개월', cost: '5천-1.5억' },
+        { n: '2', title: '업무 자동화', desc: '수기 입력, 알림, 보고서 생성 등 반복 업무를 워크플로우로 자동화합니다.', duration: '2-3개월', cost: '3천-1억' },
+        { n: '3', title: 'AI 에이전트 연동', desc: '구조화된 데이터 위에 AI를 올려, 자연어로 데이터를 조회하고 리포트를 자동 생성합니다.', duration: '2-3개월', cost: '5천-2억' }
+      ];
+    } else if (score <= 55) {
+      steps = [
+        { n: '1', title: '데이터 통합 & 시스템 연동', desc: '분산된 데이터를 한 곳으로 모으고, 기존 시스템과 API로 연동합니다.', highlight: '지금 가장 필요한 단계', duration: '2-3개월', cost: '3천-1억' },
+        { n: '2', title: '워크플로우 자동화', desc: '승인, 알림, 리포트 등 반복 프로세스를 자동화합니다.', duration: '1-2개월', cost: '2천-8천만' },
+        { n: '3', title: 'AI 에이전트 연동', desc: 'AI가 데이터를 읽고 분석하여, 의사결정을 지원합니다.', duration: '2-3개월', cost: '5천-2억' }
+      ];
+    } else {
+      steps = [
+        { n: '1', title: 'AI 파일럿 프로젝트', desc: '가장 효과가 큰 영역 하나를 선정하여 AI를 먼저 적용합니다.', highlight: '지금 시작할 수 있는 단계', duration: '1-2개월', cost: '3천-1억' },
+        { n: '2', title: 'AI 확장 & 고도화', desc: '파일럿 결과를 바탕으로 다른 업무 영역으로 AI를 확대합니다.', duration: '2-3개월', cost: '5천-2억' },
+        { n: '3', title: '완전 자동화', desc: '사람의 개입 없이 AI가 판단하고 실행하는 영역을 넓힙니다.', duration: '3개월+', cost: '5천만원+' }
+      ];
+    }
+
+    let roadmapHTML = '';
+    steps.forEach(s => {
+      const color = s.n === '1' ? 'var(--accent)' : s.n === '2' ? 'var(--yellow)' : 'var(--text-muted)';
+      roadmapHTML += `
+        <div class="roadmap-step">
+          <div class="rs-num" style="background: ${color}22; color: ${color}; border: 2px solid ${color}44;">${s.n}</div>
+          <div class="rs-content">
+            <div class="rs-title">${s.title}</div>
+            <div class="rs-desc">${s.desc}</div>
+            <div class="rs-meta">예상 기간: ${s.duration} | 예상 비용: ${s.cost}</div>
+            ${s.highlight ? `<div class="rs-highlight">→ ${s.highlight}</div>` : ''}
+          </div>
+        </div>
+      `;
+    });
+
+    document.getElementById('roadmapSteps').innerHTML = roadmapHTML;
+  }
+
+
+  function copyLink() {
+    const base = window.location.href.split('?')[0];
+    const url = base + '?utm_source=share&utm_medium=link_copy&utm_campaign=diagnostic';
+    navigator.clipboard.writeText(url).then(() => {
+      alert('링크가 복사되었습니다!');
+    });
+  }
+
+  function shareKakao() {
+    if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
+      alert('카카오톡 공유 기능을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    const pageUrl = window.location.href.split('?')[0] + '?utm_source=kakao&utm_medium=share&utm_campaign=diagnostic';
+    const scoreEl = document.getElementById('scoreNum');
+    const score = scoreEl ? scoreEl.textContent.replace(/[^0-9]/g, '') : '';
+
+    Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: 'AI 시대, 우리 회사 업무 시스템 진단',
+        description: score
+          ? '우리 회사 업무 시스템 성숙도: ' + score + '점 — 7개 질문으로 숨은 비용과 AI 도입 로드맵을 확인해보세요.'
+          : '7개 질문에 답하면 업무 시스템 수준 + 숨은 비용 + AI 도입 로드맵을 바로 확인할 수 있습니다.',
+        imageUrl: '',  // TODO: 실서비스 시 대표 이미지 URL 추가
+        link: {
+          mobileWebUrl: pageUrl,
+          webUrl: pageUrl
+        }
+      },
+      buttons: [
+        {
+          title: '나도 진단해보기',
+          link: {
+            mobileWebUrl: pageUrl,
+            webUrl: pageUrl
+          }
+        }
+      ]
+    });
+  }
+
+  function restart() {
+    answers.q0 = null;
+    answers.q1 = null;
+    answers.q2 = 5;
+    answers.q3 = [];
+    answers.q4 = 10;
+    answers.q5 = [];
+    answers.q6 = null;
+    currentStep = 0;
+
+    document.getElementById('resultPage').classList.remove('active');
+    document.getElementById('stepIndicator').style.display = 'flex';
+    document.getElementById('headerSection').style.display = 'block';
+
+    document.querySelectorAll('.question-card').forEach(q => q.classList.remove('active'));
+    document.getElementById('q0').classList.add('active');
+
+    document.querySelectorAll('.option-grid').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('.check-item').forEach(c => c.classList.remove('checked'));
+
+    document.getElementById('hourSlider').value = 5;
+    document.getElementById('empSlider').value = 10;
+    document.getElementById('sliderValue').textContent = '5시간';
+    document.getElementById('empSliderValue').textContent = '10명';
+    document.getElementById('casesSection').style.display = 'none';
+    document.getElementById('problemDiagnosis').style.display = 'block';
+    document.getElementById('timeLoss').innerHTML = '';
+    document.getElementById('aiBridge').style.display = 'none';
+    // 탭 초기화
+    switchTab(0);
+
+    document.querySelectorAll('[id^="nextBtn"]').forEach(btn => { btn.disabled = true; });
+
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  updateProgress();
+  const hourlyRate = 2.5; // 고용노동부 2024.6 기준
+</script>
+</body>
+</html>
