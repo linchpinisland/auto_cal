@@ -2169,8 +2169,24 @@
     const titleEl = document.getElementById('resultTitle');
     const descEl = document.getElementById('resultDesc');
     const industry = industryNames[answers.q0] || '';
-    const painpoints = (answers.q5 || []).join(', ');
-    const priority = answers.q6 || '';
+    const painLabels = {
+      duplicate: '같은 데이터를 여러 곳에 입력함',
+      versions: '파일 버전이 헷갈림',
+      overtime: '월말/분기 마감 때 야근함',
+      mismatch: '숫자가 안 맞아서 확인 전화 돌림',
+      silo: '담당자가 없으면 아무도 모르는 업무가 있음',
+      realtime: '실시간 현황 파악이 안 됨',
+      reporting: '보고서 만드는 데 반나절 이상 걸림'
+    };
+    const priorityLabels = {
+      manual: '매번 같은 걸 수동으로 입력/복사',
+      scattered: '데이터가 여기저기 흩어져서 파악이 안 됨',
+      errors: '숫자가 안 맞아서 확인/수정에 시간 소모',
+      reporting: '보고서/현황 파악이 실시간으로 안 됨',
+      ai: 'AI를 도입하고 싶은데 뭐부터 해야 할지 모름'
+    };
+    const painpoints = (answers.q5 || []).map(function(v) { return painLabels[v] || v; }).join(', ');
+    const priority = priorityLabels[answers.q6] || answers.q6 || '';
 
     const resultSummary = [
       '업무 시스템 성숙도: ' + (scoreEl ? scoreEl.textContent : lastScore) + '점',
