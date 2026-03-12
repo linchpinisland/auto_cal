@@ -2203,10 +2203,11 @@
         const box = document.getElementById('emailCollect');
         box.classList.add('done');
         box.innerHTML = '<div class="email-collect-text">✅ 전송 완료! 진단 결과가 이메일로 발송되었습니다.</div>';
-      }).catch(function() {
+      }).catch(function(err) {
+        console.error('EmailJS Error:', err);
         const box = document.getElementById('emailCollect');
         box.classList.add('done');
-        box.innerHTML = '<div class="email-collect-text">✅ 저장 완료! 결과가 기록되었습니다.</div>';
+        box.innerHTML = '<div class="email-collect-text" style="color:var(--red);">⚠️ 전송 실패: ' + (err.text || err.message || JSON.stringify(err)) + '</div>';
       });
     } else {
       const box = document.getElementById('emailCollect');
