@@ -1127,6 +1127,8 @@
 <meta property="og:type" content="website">
 <!-- Kakao JavaScript SDK -->
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" crossorigin="anonymous"></script>
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -1650,6 +1652,11 @@
     Kakao.init('5c8e36ab9057086e9ae407dd44d357e8');
   }
 
+  // ── EmailJS 초기화 ──
+  if (typeof emailjs !== 'undefined') {
+    emailjs.init({ publicKey: 'cCypE57zECBwhhSrQ' });
+  }
+
   const answers = {
     q0: null, // industry
     q1: null, // data management
@@ -2143,19 +2150,69 @@
 
   function submitResultEmail() {
     const input = document.getElementById('resultEmailInput');
+    const btn = document.getElementById('resultEmailBtn');
     const email = input.value.trim();
     if (!email || !email.includes('@')) {
       input.style.borderColor = 'var(--red)';
       input.placeholder = '올바른 이메일을 입력해주세요';
       return;
     }
-    // 이메일 포함해서 재전송
+
+    btn.disabled = true;
+    btn.textContent = '전송 중...';
+
+    // Google Forms에 이메일 포함 재전송
     submitToGoogleForms(lastScore, email);
 
-    // 성공 UI
-    const box = document.getElementById('emailCollect');
-    box.classList.add('done');
-    box.innerHTML = '<div class="email-collect-text">✅ 저장 완료! 입력하신 이메일로 결과를 보내드리겠습니다.</div>';
+    // 진단 결과 요약 생성
+    const scoreEl = document.getElementById('scoreNum');
+    const titleEl = document.getElementById('resultTitle');
+    const descEl = document.getElementById('resultDesc');
+    const industry = industryNames[answers.q0] || '';
+    const painpoints = (answers.q5 || []).join(', ');
+    const priority = answers.q6 || '';
+
+    const resultSummary = [
+      '업무 시스템 성숙도: ' + (scoreEl ? scoreEl.textContent : lastScore) + '점',
+      '진단 결과: ' + (titleEl ? titleEl.textContent : ''),
+      '',
+      '업종: ' + industry,
+      '직원 수: ' + answers.q4 + '명',
+      '주당 수기 입력: ' + answers.q2 + '시간',
+      '',
+      '주요 페인포인트: ' + painpoints,
+      '우선 해결 문제: ' + priority,
+      '',
+      (descEl ? descEl.textContent : '')
+    ].join('\n');
+
+    // EmailJS로 발송
+    if (typeof emailjs !== 'undefined') {
+      emailjs.send('service_dh6ny15', 'template_u9j1xo8', {
+        to_email: email,
+        score: scoreEl ? scoreEl.textContent : String(lastScore),
+        title: titleEl ? titleEl.textContent : '',
+        industry: industry,
+        employees: String(answers.q4),
+        hours: String(answers.q2),
+        painpoints: painpoints,
+        priority: priority,
+        description: descEl ? descEl.textContent : '',
+        result_summary: resultSummary
+      }).then(function() {
+        const box = document.getElementById('emailCollect');
+        box.classList.add('done');
+        box.innerHTML = '<div class="email-collect-text">✅ 전송 완료! 진단 결과가 이메일로 발송되었습니다.</div>';
+      }).catch(function() {
+        const box = document.getElementById('emailCollect');
+        box.classList.add('done');
+        box.innerHTML = '<div class="email-collect-text">✅ 저장 완료! 결과가 기록되었습니다.</div>';
+      });
+    } else {
+      const box = document.getElementById('emailCollect');
+      box.classList.add('done');
+      box.innerHTML = '<div class="email-collect-text">✅ 저장 완료! 결과가 기록되었습니다.</div>';
+    }
   }
 
   function getColorValue(colorVar) {
