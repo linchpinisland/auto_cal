@@ -764,6 +764,56 @@
   }
   .restart-btn:hover { color: var(--text); }
 
+  /* ── Email Collect ── */
+  .email-collect {
+    text-align: center;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-3);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .email-collect-text {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .email-collect-form {
+    display: flex;
+    gap: 8px;
+    max-width: 360px;
+    margin: 0 auto 10px;
+  }
+  .email-collect-form input {
+    flex: 1;
+    padding: 12px 14px;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-card);
+    font-size: 14px;
+    outline: none;
+    background: var(--gray-0);
+  }
+  .email-collect-form input:focus {
+    border-color: var(--accent);
+  }
+  .email-collect-form .btn {
+    padding: 12px 20px;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .email-collect-note {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .email-collect.done {
+    background: var(--green-1);
+    border-color: var(--green-3);
+  }
+  .email-collect.done .email-collect-text {
+    color: var(--green-7);
+  }
+
   /* ── Consent Modal ── */
   .consent-overlay {
     position: fixed;
@@ -1360,6 +1410,16 @@
 
     <!-- Similar Company Quote -->
     <div class="similar-quote" id="similarQuote"></div>
+
+    <!-- 이메일 수집 (진단 결과 리포트) -->
+    <div id="emailCollect" class="email-collect">
+      <div class="email-collect-text">진단 결과를 이메일로 받아보시겠어요?</div>
+      <div class="email-collect-form">
+        <input type="email" id="resultEmailInput" placeholder="example@company.com">
+        <button class="btn btn-primary" id="resultEmailBtn" onclick="submitResultEmail()">받기</button>
+      </div>
+      <div class="email-collect-note">진단 데이터와 함께 저장되며, 상담 신청과는 별개입니다.</div>
+    </div>
 
     <!-- 상단 소형 CTA -->
     <div id="topCta" style="text-align:center; margin-bottom:24px;">
@@ -2057,24 +2117,45 @@
     submitToGoogleForms(score);
   }
 
-  function submitToGoogleForms(score) {
+  const GFORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScBfeKRiyAo49CbUUdxfg_2uSxDQVDTo6EW6QmBlltmrpD3Nw/formResponse';
+  let lastScore = 0;
+
+  function submitToGoogleForms(score, email) {
     try {
-      const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdcI7LrS_zI3cSB4Z8W18ryIRjmmo4p-fAhNhwbjw7R4y1U3w/formResponse';
+      lastScore = score;
       const formData = new URLSearchParams();
-      formData.append('entry.680892542', industryNames[answers.q0] || '');   // 업종
+      if (email) formData.append('entry.452856279', email);                   // 이메일
+      formData.append('entry.680892542', industryNames[answers.q0] || '');    // 업종
       formData.append('entry.272927794', String(score));                      // 점수
       formData.append('entry.1275122278', (answers.q5 || []).join(', '));     // 페인포인트
       formData.append('entry.2069373523', answers.q6 || '');                  // 우선 문제
       formData.append('entry.1335563225', String(answers.q4));                // 직원 수
       formData.append('entry.2058756715', String(answers.q2));                // 수기 입력 시간
 
-      fetch(FORM_URL, {
+      fetch(GFORM_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
       }).catch(function() {});
     } catch(e) {}
+  }
+
+  function submitResultEmail() {
+    const input = document.getElementById('resultEmailInput');
+    const email = input.value.trim();
+    if (!email || !email.includes('@')) {
+      input.style.borderColor = 'var(--red)';
+      input.placeholder = '올바른 이메일을 입력해주세요';
+      return;
+    }
+    // 이메일 포함해서 재전송
+    submitToGoogleForms(lastScore, email);
+
+    // 성공 UI
+    const box = document.getElementById('emailCollect');
+    box.classList.add('done');
+    box.innerHTML = '<div class="email-collect-text">✅ 저장 완료! 입력하신 이메일로 결과를 보내드리겠습니다.</div>';
   }
 
   function getColorValue(colorVar) {
@@ -2478,7 +2559,7 @@
 
 
   // ── 개인정보 동의 모달 ──
-  const FORM_LINK = 'https://docs.google.com/forms/d/e/1FAIpQLSdcI7LrS_zI3cSB4Z8W18ryIRjmmo4p-fAhNhwbjw7R4y1U3w/viewform?usp=dialog';
+  const FORM_LINK = 'https://docs.google.com/forms/d/e/1FAIpQLScBfeKRiyAo49CbUUdxfg_2uSxDQVDTo6EW6QmBlltmrpD3Nw/viewform?usp=dialog';
 
   function openConsentModal() {
     document.getElementById('consentModal').style.display = 'flex';
