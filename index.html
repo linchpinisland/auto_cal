@@ -2059,7 +2059,7 @@
 
   function submitToGoogleForms(score) {
     try {
-      const FORM_URL = 'https://docs.google.com/forms/u/4/d/e/1FAIpQLSdcI7LrS_zI3cSB4Z8W18ryIRjmmo4p-fAhNhwbjw7R4y1U3w/formResponse';
+      const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdcI7LrS_zI3cSB4Z8W18ryIRjmmo4p-fAhNhwbjw7R4y1U3w/formResponse';
       const formData = new URLSearchParams();
       formData.append('entry.680892542', industryNames[answers.q0] || '');   // 업종
       formData.append('entry.272927794', String(score));                      // 점수
@@ -2478,7 +2478,7 @@
 
 
   // ── 개인정보 동의 모달 ──
-  const FORM_LINK = 'https://docs.google.com/forms/u/4/d/e/1FAIpQLSdcI7LrS_zI3cSB4Z8W18ryIRjmmo4p-fAhNhwbjw7R4y1U3w/viewform?usp=dialog';
+  const FORM_LINK = 'https://docs.google.com/forms/d/e/1FAIpQLSdcI7LrS_zI3cSB4Z8W18ryIRjmmo4p-fAhNhwbjw7R4y1U3w/viewform?usp=dialog';
 
   function openConsentModal() {
     document.getElementById('consentModal').style.display = 'flex';
