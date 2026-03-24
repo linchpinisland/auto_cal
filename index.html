@@ -1498,6 +1498,32 @@
         <div class="rc-detail" id="cost3YearDetail"></div>
       </div>
 
+      <!-- ROI 카드 (신규) -->
+      <div class="result-card" id="roiCard" style="display:none; margin-top:16px; border:2px solid var(--accent); background:linear-gradient(135deg, var(--blue-1), white);">
+        <h3 style="margin-bottom:12px; font-size:16px;">투자 대비 회수 기간 (ROI)</h3>
+        <div style="display:flex; gap:12px;">
+          <div style="flex:1; text-align:center;">
+            <div class="rc-label">예상 투자 비용</div>
+            <div class="rc-value" id="roiInvestment" style="font-size:20px; color:var(--text);">-</div>
+          </div>
+          <div style="flex:1; text-align:center;">
+            <div class="rc-label">월 절감액</div>
+            <div class="rc-value" id="roiMonthlySaving" style="font-size:20px; color:var(--green);">-</div>
+          </div>
+          <div style="flex:1; text-align:center;">
+            <div class="rc-label">회수 기간</div>
+            <div class="rc-value" id="roiMonths" style="font-size:20px; color:var(--accent);">-</div>
+          </div>
+        </div>
+        <div class="rc-detail" id="roiDetail" style="margin-top:8px; text-align:center;"></div>
+      </div>
+
+      <!-- 매칭 인사이트 (신규) -->
+      <div id="matchInsight" style="display:none; margin-top:16px; padding:16px 20px; background:var(--orange-1, #fff7ed); border:1px solid var(--orange-3, #fed7aa); border-radius:12px;">
+        <div style="font-size:14px; font-weight:600; margin-bottom:6px; color:var(--orange);" id="matchInsightTitle"></div>
+        <div style="font-size:13px; color:var(--text-muted); line-height:1.7;" id="matchInsightText"></div>
+      </div>
+
       <div class="estimate-notice">※ 응답 기반 간이 추정치이며, 실제 비용은 업종·지역·업무 특성에 따라 다를 수 있습니다.</div>
 
 
@@ -1550,7 +1576,7 @@
       <h3>이 진단의 데이터 기반</h3>
       <div class="source-grid">
         <div class="source-item">
-          <div class="source-num">12,257건</div>
+          <div class="source-num">39,425건</div>
           <div class="source-desc">국내 IT 외주 프로젝트<br>전수 분석</div>
         </div>
         <div class="source-item">
@@ -1576,7 +1602,7 @@
         <div class="method-step">
           <div class="method-step-num">1단계</div>
           <div class="method-step-title">데이터 수집</div>
-          <div class="method-step-desc">국내 IT 외주 플랫폼의 12,257건 프로젝트를 수집하고, 이 중 '엑셀→웹 전환' 관련 1,842건을 별도 분류했습니다.</div>
+          <div class="method-step-desc">국내 IT 외주 플랫폼의 39,425건 프로젝트를 수집하고, 이 중 '엑셀→웹 전환' 관련 1,842건을 별도 분류했습니다.</div>
         </div>
         <div class="method-step">
           <div class="method-step-num">2단계</div>
@@ -1604,7 +1630,7 @@
             · Gartner (2024). 데이터 품질 불량으로 기업 평균 연간 $12.9M 손실<br>
             · McKinsey (2024). 디지털 전환 기대 비용절감 달성률 25%, EBIT 개선 목표 20%+<br>
             · Deloitte Global Intelligent Automation Survey — 자동화 평균 비용절감 32%<br>
-            · 개발곰곰 독자 분석: 12,257건 IT 프로젝트, 1,842건 엑셀→웹 전환 사례
+            · 개발곰곰 독자 분석: 39,425건 IT 프로젝트, 1,842건 엑셀→웹 전환 사례
           </div>
         </div>
         <div class="method-disclaimer">※ 이 진단은 간이 자가진단이며, 정밀 진단을 위해서는 전문가 상담을 권장합니다.</div>
@@ -1670,74 +1696,11 @@
   let currentStep = 0;
   const totalSteps = 7;
 
-  // Q5 페인포인트별 실데이터 매칭 (painpoint_detail.txt + full_problem_analysis.txt 기반)
-  const painDataMap = {
-    duplicate: {
-      title: '같은 데이터를 여러 곳에 중복 입력',
-      cases: 180, avgBudget: 1427, category: 'A3',
-      desc: '수기 입력을 호소한 기업이 180곳입니다. 이 기업들의 평균 시스템 구축 비용은 1,427만원이었습니다.',
-      impact: '중복 입력은 데이터 오류의 주요 원인입니다. 한 곳에 입력하면 자동으로 연동되는 시스템으로 전환 시 수기 입력 시간을 크게 줄일 수 있습니다. (Deloitte: 자동화 도입 기업 평균 32% 비용 절감)'
-    },
-    versions: {
-      title: '파일 버전 혼란 (_최종_진짜최종)',
-      cases: 48, avgBudget: 1380, category: 'C5',
-      desc: '데이터 이력 추적이 안 되는 문제를 겪은 기업이 48곳입니다.',
-      impact: '버전 관리 실패는 잘못된 데이터로 의사결정을 하게 만듭니다. 변경 이력이 자동 기록되는 시스템이면 "어느 버전이 맞나?" 고민이 사라집니다.'
-    },
-    overtime: {
-      title: '월말/분기 마감 야근',
-      cases: 36, avgBudget: 1510, category: 'B2+F2',
-      desc: '마감 시 시간 소모와 수동 보고서 작성 문제를 겪은 기업이 36곳입니다.',
-      impact: '마감 야근의 주 원인은 분산된 데이터를 수동으로 취합하는 것입니다. 자동 집계 시스템 도입 시 마감 소요 시간을 크게 줄일 수 있습니다.'
-    },
-    mismatch: {
-      title: '숫자 불일치로 확인 전화',
-      cases: 42, avgBudget: 961, category: 'C1+C2',
-      desc: '데이터 누락이나 오류 문제를 겪은 기업이 42곳입니다. 평균 해결 비용은 961만원이었습니다.',
-      impact: '수기 입력의 평균 오류율은 1~5%입니다. 매출 1억 기준 500만원까지 보이지 않는 손실이 발생할 수 있습니다.'
-    },
-    silo: {
-      title: '담당자 부재 시 업무 마비',
-      cases: 17, avgBudget: 1650, category: 'D1',
-      desc: '특정인에게 업무가 집중된 문제를 겪은 기업이 17곳입니다.',
-      impact: '핵심 담당자 퇴사 시 업무 공백이 발생합니다. 시스템에 업무 프로세스가 기록되면, 누구나 이어서 처리할 수 있습니다.'
-    },
-    realtime: {
-      title: '실시간 현황 파악 불가',
-      cases: 1374, avgBudget: 1880, category: 'TOP패턴',
-      desc: '전체 12,257건 프로젝트 중 11.2%인 1,374곳이 이 문제를 겪고 있습니다.',
-      impact: '실시간 데이터 없이 의사결정을 하면, 이미 지나간 상황에 대응하게 됩니다. 대시보드 도입 기업의 평균 투자 비용은 1,880만원입니다.'
-    },
-    reporting: {
-      title: '보고서 만드는 데 반나절 이상',
-      cases: 90, avgBudget: 1393, category: 'F1~F3',
-      desc: '통계/리포팅 문제를 겪은 기업이 90곳입니다.',
-      impact: '보고서 작성 시간의 대부분은 데이터 수집과 정리에 소모됩니다. 자동 리포팅을 도입하면 보고서 생성 시간을 크게 단축할 수 있습니다. (McKinsey: 루틴 업무 시간 26~36% 회수 가능)'
-    }
-  };
+  // ── API 엔드포인트 (Cloudflare Workers) ──
+  const API_URL = 'https://auto-cal-api.linchpin-island.workers.dev';
 
-  // TOP 패턴 실데이터 (domain_cross.txt 기반)
-  const topPatterns = {
-    excel_to_system: { label: '엑셀/수작업→시스템화', cases: 709, avgBudget: 1733 },
-    scattered_to_unified: { label: '분산데이터→통합관리', cases: 3969, avgBudget: 1420 },
-    realtime_monitoring: { label: '실시간 모니터링 부재', cases: 1374, avgBudget: 1880 },
-    automation: { label: '반복 업무 자동화', cases: 566, avgBudget: 1536 },
-    data_decision: { label: '데이터 기반 의사결정', cases: 1390, avgBudget: 2127 }
-  };
-
-  // Industry benchmarks (12,257건 실데이터 기반)
-  const industryBenchmarks = {
-    manufacturing: { score: 38, projects: 520, avgBudget: 2479 },
-    logistics: { score: 35, projects: 453, avgBudget: 2878 },
-    service: { score: 25, projects: 2948, avgBudget: 1572 },
-    healthcare: { score: 30, projects: 342, avgBudget: 2139 },
-    construction: { score: 28, projects: 1989, avgBudget: 2245 },
-    education: { score: 40, projects: 646, avgBudget: 1919 },
-    commerce: { score: 30, projects: 2008, avgBudget: 2006 },
-    finance: { score: 45, projects: 411, avgBudget: 1661 },
-    marketing: { score: 42, projects: 501, avgBudget: 1619 },
-    other: { score: 32, projects: 982, avgBudget: 1773 }
-  };
+  // API 응답 캐시 (렌더링 함수에서 참조)
+  let apiResult = null;
 
   const industryNames = {
     manufacturing: '제조/생산',
@@ -1752,59 +1715,7 @@
     other: '기타'
   };
 
-  // 업종별 실제 전환 사례 (painpoint_detail.txt 기반)
-  const industryCases = {
-    manufacturing: [
-      { title: '품질 관리 보고서 생성 웹 시스템', budget: 8000, pain: '엑셀로 관리하던 품질 데이터를 시스템으로 전환' },
-      { title: '품질데이터 관리 및 성적서 발급 시스템', budget: 4000, pain: '엑셀 데이터 → 웹 기반 자동 성적서 발행' },
-      { title: '제품정보-주문-재고 관리 웹시스템', budget: 1400, pain: '엑셀 행/열 폭증으로 로딩 지연, 보안 취약' }
-    ],
-    logistics: [
-      { title: '자동차 수송 물류 배차관리 시스템', budget: 12000, pain: '수기 배차 → 자동 배차 전환' },
-      { title: '차량 탁송 웹 프로그램', budget: 3000, pain: '수기 입력 배차 → 시스템 자동화' },
-      { title: '무역 품목별 이력관리 업무 지원', budget: 3000, pain: '엑셀 업체별 리스트 → 웹 시스템 대체' }
-    ],
-    service: [
-      { title: '대리점/수수료 관리 ERP 구축', budget: 3500, pain: '엑셀 관리 → ERP 전환' },
-      { title: '매장별 매출 관리 시스템', budget: 2000, pain: '엑셀 수기 관리 → 실시간 매출 대시보드' },
-      { title: '예약/고객 관리 웹 시스템', budget: 1500, pain: '전화+수기 예약 → 온라인 통합 관리' }
-    ],
-    healthcare: [
-      { title: 'NMR 결과 분석 업무자동화 S/W', budget: 4000, pain: '수작업 분석 → AI+RPA 자동화' },
-      { title: '건강검진 결과 제공 솔루션', budget: 8000, pain: '수기 입력 → DB 연동 자동 리포트' },
-      { title: '환자 예약/접수 관리 시스템', budget: 3000, pain: '종이 접수 → 웹 기반 통합 관리' }
-    ],
-    construction: [
-      { title: 'LED 전광판 견적 웹 시스템', budget: 5000, pain: '엑셀 기반 → 웹 ERP 전환' },
-      { title: '감정평가서 PDF 정보 추출 솔루션', budget: 6000, pain: '수작업 데이터 입력 → AI 자동 추출' },
-      { title: '프로젝트 중심 사무 자동화 시스템', budget: 15000, pain: '엑셀 한계 → 커스텀 업무 시스템' }
-    ],
-    education: [
-      { title: '온라인 교육 콘텐츠 관리 시스템', budget: 5000, pain: '파일 분산 관리 → 통합 CMS' },
-      { title: '수강생 출결/정산 관리 시스템', budget: 3000, pain: '수기 출결+정산 → 자동화 시스템' },
-      { title: '강사/강좌 스케줄 관리 웹앱', budget: 2000, pain: '엑셀 스케줄 → 실시간 배정 시스템' }
-    ],
-    commerce: [
-      { title: '상품 재고/주문 관리 ERP', budget: 3500, pain: '엑셀 재고관리 → 실시간 재고 시스템' },
-      { title: '온라인 쇼핑몰 주문관리 시스템', budget: 5000, pain: '수작업 주문 처리 → 자동화 시스템' },
-      { title: '견적서 자동 생성 웹 시스템', budget: 2000, pain: '엑셀 견적서 → 온라인 자동 견적' }
-    ],
-    finance: [
-      { title: 'B2B 금융 신용평가 솔루션 MVP', budget: 5000, pain: '수동 데이터 분석 → 자동화 시스템' },
-      { title: '매출/지출 자동 분류 관리 시스템', budget: 3000, pain: '엑셀 수기 분류 → 자동 카테고리 매칭' },
-      { title: '거래처 정산 관리 웹 시스템', budget: 2500, pain: '수작업 정산 → 자동 대사/정산' }
-    ],
-    marketing: [
-      { title: '영업사원용 CRM 시스템 개발', budget: 5000, pain: '수기 고객관리 → CRM 자동화' },
-      { title: '캠페인 성과 분석 대시보드', budget: 3000, pain: '엑셀 캠페인 관리 → 통합 대시보드' },
-      { title: '리드 관리 및 자동 후속 시스템', budget: 2000, pain: '수작업 리드 추적 → 자동 알림/분류' }
-    ],
-    other: [
-      { title: '전시마케팅 성과분석 솔루션', budget: 2000, pain: '엑셀 기반 → 웹 솔루션 전환' },
-      { title: '문서 자동화 생성 프로그램', budget: 800, pain: '반복 수작업 → 자동 생성' },
-      { title: '홈택스/은행 스크래핑 기반 회계관리', budget: 5000, pain: '엑셀 기반 → 자동 보고서 출력' }
-    ]
-  };
+  // 데이터 테이블은 서버(Workers API)로 이전됨
 
   function updateProgress() {
     const pct = ((currentStep) / (totalSteps + 1)) * 100;
@@ -1908,220 +1819,122 @@
   }
 
   function showEmailGate() {
-    // 이메일 게이트를 결과 전에서 제거 → 결과 중간으로 통합 (전문가 합의)
-    // 결과를 바로 보여줌으로써 신뢰 구축 후 이메일 요청
     document.getElementById('q6').classList.remove('active');
     showResult();
   }
 
-  function showResult() {
+  async function showResult() {
     document.getElementById('stepIndicator').style.display = 'none';
     document.getElementById('headerSection').style.display = 'none';
 
-    const calculations = calculateScore();
-    renderResult(calculations);
-
+    // 로딩 표시
     document.getElementById('resultPage').classList.add('active');
+    document.getElementById('resultPage').innerHTML = '<div style="text-align:center;padding:60px 20px;"><div style="font-size:18px;color:var(--accent);margin-bottom:12px;">분석 중...</div><div style="color:var(--text-muted);">39,425건 프로젝트 데이터와 비교하고 있습니다</div></div>';
+
     currentStep = totalSteps + 1;
     updateProgress();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
 
-  function calculateScore() {
-    const mgmt = parseInt(answers.q1);
-    const hours = answers.q2;
-    const scatter = answers.q3.length;
-    const emp = answers.q4;
-    const painCount = answers.q5.length;
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers: answers })
+      });
 
-    // Scoring algorithm
-    let mgmtScore = mgmt * 25; // 25, 50, 75, 100
+      if (!response.ok) throw new Error('API 응답 오류: ' + response.status);
 
-    let hoursScore;
-    if (hours <= 2) hoursScore = 100;
-    else if (hours <= 5) hoursScore = 75;
-    else if (hours <= 10) hoursScore = 50;
-    else if (hours <= 20) hoursScore = 25;
-    else hoursScore = 10;
+      apiResult = await response.json();
+      // 결과 페이지 HTML 복원 후 렌더링
+      restoreResultHTML();
+      renderResult(apiResult);
 
-    // ERP가 있으면 데이터 분산의 부정적 효과를 완화 (이미 구조화된 부분 존재)
-    const hasErp = answers.q3.includes('erp');
-    const effectiveScatter = hasErp ? Math.max(scatter - 1, 0) : scatter;
-    let scatterScore;
-    if (effectiveScatter <= 1) scatterScore = 100;
-    else if (effectiveScatter <= 2) scatterScore = 70;
-    else if (effectiveScatter <= 3) scatterScore = 45;
-    else if (effectiveScatter <= 4) scatterScore = 25;
-    else scatterScore = 10;
-
-    let painScore;
-    if (painCount <= 1) painScore = 90;
-    else if (painCount <= 2) painScore = 70;
-    else if (painCount <= 3) painScore = 50;
-    else if (painCount <= 5) painScore = 30;
-    else painScore = 10;
-
-    let empPenalty = 0;
-    if (mgmtScore < 50 && emp > 20) empPenalty = 15;
-
-    // AI/변화 의지 점수: Q6 응답 + 시스템 수준 조합으로 의미 있는 기여
-    let intentScore = 50; // 기본값
-    if (answers.q6 === 'ai') intentScore = mgmtScore >= 50 ? 90 : 70; // AI 관심 + 시스템 기반 있으면 높음
-    else if (answers.q6 === 'reporting') intentScore = 65; // 데이터 활용 의지
-    else if (answers.q6 === 'scattered') intentScore = 55; // 통합 필요 인식
-    else if (answers.q6 === 'errors') intentScore = 45; // 문제 인식 있으나 방어적
-    else if (answers.q6 === 'manual') intentScore = 40; // 기본적 자동화 니즈
-
-    let score = (
-      mgmtScore * 0.25 +
-      hoursScore * 0.20 +
-      scatterScore * 0.20 +
-      painScore * 0.15 +
-      (100 - empPenalty * 5) * 0.10 +
-      intentScore * 0.10
-    );
-    score = Math.min(Math.max(score, 5), 95);
-
-    // ── Cost calculation (레퍼런스 기반 보정) ──
-    // [R1] 시급: 고용노동부 고용형태별근로실태조사 2024.6 기준 전체근로자 시간당 임금총액 25,156원
-    const hourlyRate = 2.5; // 만원 (25,156원 → 간접비 미포함 보수적 적용)
-    const weeklyHours = hours;
-    const yearlyManualCost = Math.round(weeklyHours * 50 * hourlyRate);
-
-    // [R2] 오류율: Panko(2008) 스프레드시트 셀 오류율 1~5%, PMC 메타분석(2024) 단일입력 SDE 0.29%
-    //       데이터 분산도가 높을수록 재입력/복사 빈도 증가 → 오류 누적
-    //       baseErrorRate 상한 0.10 (10%) 설정 — Panko 실험실 환경 3.9% 평균의 2.5배
-    const baseErrorRate = Math.min(0.01 + (scatter * 0.015) + (painCount * 0.008), 0.10);
-
-    // [R3] 오류 비용: IBM/Gartner 1-10-100 규칙 (예방 $1, 발견 $10, 실패 $100)
-    //       수기 입력 비용 × 오류율 = 오류 발생 비용, × 10배 = 수정/재작업 비용 포함
-    const yearlyErrorCost = Math.round(yearlyManualCost * baseErrorRate * 10);
-
-    // [R4] 기회비용: 보고서 작성 시간 추정 (Deloitte: 수동 프로세스 기업은 30~40% 더 많은 노동시간 소모)
-    //       직원당 주 2시간 비효율 추정 (보수적) × 시급 × 50주
-    const oppCostPerEmp = Math.round(2 * 50 * hourlyRate); // 연간 1인당 약 250만원
-    const oppCost = Math.round(oppCostPerEmp * Math.min(emp, 50) * (answers.q6 === 'reporting' ? 0.5 : 0.3));
-
-    const totalHiddenCost = yearlyManualCost + yearlyErrorCost + oppCost;
-
-    // [R5] 절감률: McKinsey(2024) 디지털 전환 기대 비용절감 달성률 25%,
-    //       Deloitte Global Automation Survey 평균 비용절감 32%,
-    //       McKinsey 디지털 로드맵 EBIT 개선 목표 20%+
-    //       → 엑셀→시스템 전환 시 보수적 적용 (직접 자동화 효과만)
-    const savingRate = mgmt <= 1 ? 0.40 : mgmt === 2 ? 0.30 : mgmt === 3 ? 0.20 : 0.10;
-    const yearlySaving = Math.round(totalHiddenCost * savingRate);
-    const threeYearSaving = yearlySaving * 3;
-
-    return {
-      score: Math.round(score),
-      yearlyManualCost,
-      yearlyErrorCost,
-      oppCost,
-      yearlySaving,
-      threeYearSaving,
-      savingRate,
-      baseErrorRate,
-      mgmt,
-      scatter,
-      painCount,
-      hours,
-      emp,
-      intentScore
-    };
-  }
-
-  function renderResult(calc) {
-    const score = calc.score;
-    let scoreColor, title, desc;
-
-    if (score <= 30) {
-      scoreColor = 'var(--orange)';
-      title = '지금이 가장 극적인 변화를 만들 수 있는 시점입니다';
-      desc = '엑셀/수작업 중심으로 운영되고 있어, 시스템 전환 시 비용 절감 효과가 가장 큽니다. Deloitte 조사에 따르면 자동화 도입 기업은 평균 32%의 비용을 절감합니다. AI를 도입하려면 데이터가 시스템에 있어야 합니다 — 지금은 그 기반을 만드는 것이 가장 중요한 단계입니다.';
-    } else if (score <= 55) {
-      scoreColor = 'var(--yellow)';
-      title = '핵심 데이터를 한 곳에 모으면 AI 도입이 보입니다';
-      desc = '일부 시스템은 갖추고 있지만, 데이터가 분산되어 있어 통합만으로도 큰 개선이 가능합니다. 데이터가 한 곳에 모이면, 그 위에 AI를 올리는 것은 훨씬 쉬워집니다.';
-    } else if (score <= 75) {
-      scoreColor = 'var(--accent)';
-      title = 'AI 자동화를 바로 시작할 수 있는 좋은 위치입니다';
-      desc = '데이터 관리 기반이 갖춰져 있어, 부분적인 AI 자동화부터 시작하면 빠른 효과를 볼 수 있습니다. 리포팅 자동화, 알림 자동화부터 시작해보세요.';
-    } else {
-      scoreColor = 'var(--green)';
-      title = 'AI 에이전트를 적극 도입할 수 있는 단계입니다';
-      desc = '시스템 기반이 잘 갖춰져 있습니다. AI 에이전트를 연동하면 리포팅, 알림, 데이터 입력 등에서 즉각적인 효과를 볼 수 있습니다.';
+      // 백그라운드 Google Forms 전송
+      submitToGoogleForms(apiResult.score);
+    } catch (err) {
+      console.error('API Error:', err);
+      document.getElementById('resultPage').innerHTML = '<div style="text-align:center;padding:60px 20px;"><div style="font-size:18px;color:var(--red);margin-bottom:12px;">분석에 실패했습니다</div><div style="color:var(--text-muted);">네트워크를 확인하고 다시 시도해주세요</div><button onclick="restart()" style="margin-top:20px;padding:10px 24px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;">다시 시작</button></div>';
     }
+  }
+
+  function renderResult(r) {
+    const score = r.score;
+    const colorMap = { orange: 'var(--orange)', yellow: 'var(--yellow)', blue: 'var(--accent)', green: 'var(--green)' };
+    const scoreColor = colorMap[r.scoreColor] || 'var(--accent)';
 
     // Animate score circle ring + glow
     const scoreCircle = document.getElementById('scoreCircle');
     scoreCircle.style.setProperty('--score-color', scoreColor);
     scoreCircle.style.setProperty('--score-pct', '0');
-    scoreCircle.style.boxShadow = `0 0 40px ${getColorValue(scoreColor)}33`;
-    // conic-gradient 진행 애니메이션 트리거
-    requestAnimationFrame(() => { scoreCircle.style.setProperty('--score-pct', String(score)); });
+    scoreCircle.style.boxShadow = '0 0 40px ' + getColorValue(scoreColor) + '33';
+    requestAnimationFrame(function() { scoreCircle.style.setProperty('--score-pct', String(score)); });
 
     const scoreNum = document.getElementById('scoreNum');
     scoreNum.style.color = scoreColor;
     animateNumber(scoreNum, score, '%');
 
-    document.getElementById('resultTitle').textContent = title;
-    document.getElementById('resultDesc').textContent = desc;
+    document.getElementById('resultTitle').textContent = r.title;
+    document.getElementById('resultDesc').textContent = r.desc;
 
-    // Similar company quote (실데이터 기반으로 변경)
-    renderSimilarQuote(calc);
+    // Similar company quote
+    renderSimilarQuote(r);
 
     // Time loss visualization
-    renderTimeLoss(calc);
+    renderTimeLoss(r);
 
-    // Problem diagnosis (Q5 기반 실데이터 매칭)
-    renderProblemDiagnosis(calc);
+    // Problem diagnosis
+    renderProblemDiagnosis(r);
 
     // Costs with ranges (±15%)
-    const mLow = Math.round(calc.yearlyManualCost * 0.85);
-    const mHigh = Math.round(calc.yearlyManualCost * 1.15);
-    document.getElementById('costManual').innerHTML = `약 ${mLow.toLocaleString()} ~ ${mHigh.toLocaleString()}<span class="won">만원/년</span>`;
-    document.getElementById('costManualDetail').textContent = `주 ${calc.hours}시간 × 50주 × 시급 2.5만원 기준`;
+    var c = r.costs;
+    var mLow = Math.round(c.yearlyManualCost * 0.85);
+    var mHigh = Math.round(c.yearlyManualCost * 1.15);
+    document.getElementById('costManual').innerHTML = '약 ' + mLow.toLocaleString() + ' ~ ' + mHigh.toLocaleString() + '<span class="won">만원/년</span>';
+    document.getElementById('costManualDetail').textContent = '주 ' + r.input.hours + '시간 × 50주 × 시급 ' + c.hourlyRate + '만원 기준';
 
-    const eLow = Math.round(calc.yearlyErrorCost * 0.85);
-    const eHigh = Math.round(calc.yearlyErrorCost * 1.15);
-    document.getElementById('costError').innerHTML = `약 ${eLow.toLocaleString()} ~ ${eHigh.toLocaleString()}<span class="won">만원/년</span>`;
-    document.getElementById('costErrorDetail').textContent = `오류율 ${(calc.baseErrorRate*100).toFixed(1)}% × 1-10-100 규칙 적용 (Panko·IBM/Gartner)`;
+    var eLow = Math.round(c.yearlyErrorCost * 0.85);
+    var eHigh = Math.round(c.yearlyErrorCost * 1.15);
+    document.getElementById('costError').innerHTML = '약 ' + eLow.toLocaleString() + ' ~ ' + eHigh.toLocaleString() + '<span class="won">만원/년</span>';
+    document.getElementById('costErrorDetail').textContent = '오류율 ' + (c.baseErrorRate*100).toFixed(1) + '% × 1-10-100 규칙 적용 (Panko·IBM/Gartner)';
 
-    const sLow = Math.round(calc.yearlySaving * 0.85);
-    const sHigh = Math.round(calc.yearlySaving * 1.15);
-    document.getElementById('costSaving').innerHTML = `약 ${sLow.toLocaleString()} ~ ${sHigh.toLocaleString()}<span class="won">만원/년</span>`;
-    document.getElementById('costSavingDetail').textContent = `절감률 ${Math.round(calc.savingRate*100)}% 적용 (McKinsey·Deloitte 글로벌 조사 기반 보수적 추정)`;
+    var sLow = Math.round(c.yearlySaving * 0.85);
+    var sHigh = Math.round(c.yearlySaving * 1.15);
+    document.getElementById('costSaving').innerHTML = '약 ' + sLow.toLocaleString() + ' ~ ' + sHigh.toLocaleString() + '<span class="won">만원/년</span>';
+    document.getElementById('costSavingDetail').textContent = '절감률 ' + Math.round(c.savingRate*100) + '% 적용 (McKinsey·Deloitte 글로벌 조사 기반 보수적 추정)';
 
-    const tLow = Math.round(calc.threeYearSaving * 0.85);
-    const tHigh = Math.round(calc.threeYearSaving * 1.15);
-    document.getElementById('cost3Year').innerHTML = `약 ${tLow.toLocaleString()} ~ ${tHigh.toLocaleString()}<span class="won">만원</span>`;
-    document.getElementById('cost3YearDetail').textContent = `연간 약 ${calc.yearlySaving.toLocaleString()}만원 × 3년`;
+    var tLow = Math.round(c.threeYearSaving * 0.85);
+    var tHigh = Math.round(c.threeYearSaving * 1.15);
+    document.getElementById('cost3Year').innerHTML = '약 ' + tLow.toLocaleString() + ' ~ ' + tHigh.toLocaleString() + '<span class="won">만원</span>';
+    document.getElementById('cost3YearDetail').textContent = '연간 약 ' + c.yearlySaving.toLocaleString() + '만원 × 3년';
+
+    // ROI 카드 (신규)
+    renderROICard(r);
 
     // Radar chart
-    renderRadarChart(calc);
+    renderRadarChart(r);
 
     // Score breakdown
-    renderScoreBreakdown(calc);
+    renderScoreBreakdown(r);
 
     // Benchmark
-    renderBenchmark(score);
+    renderBenchmark(r);
 
-    // AI Bridge message (점수 55 이하: 시스템 기반 부족 → AI 브릿지 필요)
-    if (score <= 55) {
+    // AI Bridge
+    if (r.showAiBridge) {
       document.getElementById('aiBridge').style.display = 'block';
     }
 
     // Industry cases
-    renderCases();
+    renderCases(r);
 
     // Action items
-    renderActionItems(calc);
+    renderActionItems(r);
 
     // Roadmap
-    renderRoadmap(score);
+    renderRoadmap(r);
 
-    // 백그라운드 Google Forms 전송 (UI 없이 자동)
-    submitToGoogleForms(score);
+    // 매칭 인사이트 & 소규모 인사이트 (신규)
+    renderMatchInsight(r);
   }
 
   const GFORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScBfeKRiyAo49CbUUdxfg_2uSxDQVDTo6EW6QmBlltmrpD3Nw/formResponse';
@@ -2260,15 +2073,14 @@
     frame();
   }
 
-  function renderRadarChart(calc) {
-    // Radar dimensions: 1. 데이터 구조화, 2. 자동화 수준, 3. 데이터 통합도, 4. 조직 준비도, 5. AI 도입 기반
-    const dimension1 = Math.min(100, calc.mgmt * 25);
-    const dimension2 = 100 - (calc.hours / 40 * 100);
-    const dimension3 = 100 - (calc.scatter / 6 * 100);
-    const dimension4 = Math.max(0, 100 - (calc.painCount / 7 * 100));
-    // dimension5: "변화 준비도" — Q6 기반 intentScore + 시스템 수준 반영
-    const intentVal = calc.intentScore || 50;
-    const dimension5 = Math.min(100, Math.round(intentVal * 0.6 + calc.mgmt * 25 * 0.4));
+  function renderRadarChart(r) {
+    var d = r.dimensions;
+    var inp = r.input;
+    var dimension1 = d.mgmtScore;
+    var dimension2 = d.hoursScore;
+    var dimension3 = d.scatterScore;
+    var dimension4 = d.painScore;
+    var dimension5 = Math.min(100, Math.round(d.intentScore * 0.6 + d.mgmtScore * 0.4));
 
     const dims = [dimension1, dimension2, dimension3, dimension4, dimension5];
     const labels = ['데이터 구조화', '자동화 수준', '데이터 통합도', '조직 준비도', '변화 준비도'];
@@ -2331,174 +2143,112 @@
     document.getElementById('radarContainer').innerHTML = svgContent;
   }
 
-  function renderSimilarQuote(calc) {
-    const industry = industryNames[answers.q0] || '해당';
-    // 실데이터 기반: 사용자 조건에 맞는 TOP 패턴 매칭
-    let matchedPattern = topPatterns.excel_to_system; // 기본
-    if (calc.mgmt <= 1) {
-      matchedPattern = topPatterns.excel_to_system;
-    } else if (calc.scatter >= 3) {
-      matchedPattern = topPatterns.scattered_to_unified;
-    } else if (answers.q6 === 'reporting') {
-      matchedPattern = topPatterns.data_decision;
-    } else if (answers.q6 === 'ai') {
-      matchedPattern = topPatterns.automation;
-    }
-
-    const bm = industryBenchmarks[answers.q0] || industryBenchmarks.other;
-    const text = `${industry} 업종에서 "${matchedPattern.label}" 문제를 해결한 프로젝트가 <strong>${matchedPattern.cases.toLocaleString()}건</strong>이며, 평균 투자 비용은 <strong>${matchedPattern.avgBudget.toLocaleString()}만원</strong>입니다. 시스템 전환 후 평균 ${Math.round(calc.savingRate * 100)}%의 업무 시간을 절감하고 있습니다.`;
-    document.getElementById('similarQuote').innerHTML = text + `<div class="similar-quote-source">— 12,257건 IT 프로젝트 분석 기준 (${industry} ${bm.projects.toLocaleString()}건 포함)</div>`;
+  function renderSimilarQuote(r) {
+    var sq = r.similarQuote;
+    var bm = r.benchmark;
+    var text = bm.industryName + ' 업종에서 "' + sq.pattern.label + '" 문제를 해결한 프로젝트가 <strong>' + sq.pattern.cases.toLocaleString() + '건</strong>이며, 평균 투자 비용은 <strong>' + sq.pattern.avgBudget.toLocaleString() + '만원</strong>입니다. 시스템 전환 후 평균 ' + Math.round(r.costs.savingRate * 100) + '%의 업무 시간을 절감하고 있습니다.';
+    document.getElementById('similarQuote').innerHTML = text + '<div class="similar-quote-source">— 39,425건 IT 프로젝트 분석 기준 (' + bm.industryName + ' ' + bm.projects.toLocaleString() + '건 포함)</div>';
   }
 
-  function renderTimeLoss(calc) {
-    const yearlyHours = calc.hours * 50;
-    const workDays = Math.round(yearlyHours / 8 * 10) / 10;
-    const months = Math.round(workDays / 22 * 10) / 10;
-    let html = '';
-    if (yearlyHours > 0) {
-      html = `
-        <div class="time-loss-num">연간 ${yearlyHours.toLocaleString()}시간</div>
-        <div class="time-loss-label">현재 수기 입력에 사용하고 있는 시간입니다<br>근무일로 환산하면 <strong style="color:var(--red)">${workDays}일 = 약 ${months}개월</strong>에 해당합니다</div>
-        <div class="time-loss-sub">주 ${calc.hours}시간 × 50주 기준 (1인 기준, 팀 전체라면 더 많을 수 있음)</div>
-      `;
+  function renderTimeLoss(r) {
+    var tl = r.timeLoss;
+    var html = '';
+    if (tl.yearlyHours > 0) {
+      html = '<div class="time-loss-num">연간 ' + tl.yearlyHours.toLocaleString() + '시간</div>' +
+        '<div class="time-loss-label">현재 수기 입력에 사용하고 있는 시간입니다<br>근무일로 환산하면 <strong style="color:var(--red)">' + tl.workDays + '일 = 약 ' + tl.months + '개월</strong>에 해당합니다</div>' +
+        '<div class="time-loss-sub">주 ' + tl.weeklyHours + '시간 × 50주 기준 (1인 기준, 팀 전체라면 더 많을 수 있음)</div>';
     }
     document.getElementById('timeLoss').innerHTML = html;
   }
 
-  function renderProblemDiagnosis(calc) {
-    const selectedPains = answers.q5;
-    if (selectedPains.length === 0) {
+  function renderProblemDiagnosis(r) {
+    var pd = r.painDiagnosis;
+    if (!pd || pd.length === 0) {
       document.getElementById('problemDiagnosis').style.display = 'none';
       return;
     }
 
-    let html = '';
-    let totalCases = 0;
-    selectedPains.forEach(key => {
-      const data = painDataMap[key];
-      if (!data) return;
+    var html = '';
+    var totalCases = 0;
+    pd.forEach(function(data) {
       totalCases += data.cases;
-      html += `
-        <div class="problem-card">
-          <div class="problem-card-title">${data.title}</div>
-          <div class="problem-card-stat">${data.cases.toLocaleString()}건의 유사 사례 | 평균 해결 비용 ${data.avgBudget.toLocaleString()}만원</div>
-          <div class="problem-card-desc">${data.impact}</div>
-        </div>
-      `;
+      html += '<div class="problem-card">' +
+        '<div class="problem-card-title">' + data.title + '</div>' +
+        '<div class="problem-card-stat">' + data.cases.toLocaleString() + '건의 유사 사례 | 평균 해결 비용 ' + data.avgBudget.toLocaleString() + '만원</div>' +
+        '<div class="problem-card-desc">' + data.impact + '</div>' +
+        '</div>';
     });
 
-    // 문제 수 → 투자 규모 상관 데이터 (full_problem_analysis.txt 기반)
-    const budgetByProblemCount = {1: 834, 2: 1119, 3: 1344, 4: 1585, 5: 1904, 6: 2058, 7: 2208};
-    const estBudget = budgetByProblemCount[Math.min(selectedPains.length, 7)] || 1344;
-
-    html += `
-      <div class="problem-summary">
-        선택하신 <strong>${selectedPains.length}개 문제</strong>와 유사한 사례가 총 <strong>${totalCases.toLocaleString()}건</strong> 있습니다.
-        비슷한 수의 문제를 가진 기업들의 평균 시스템 구축 투자 비용은 <strong>${estBudget.toLocaleString()}만원</strong>입니다.
-      </div>
-    `;
+    html += '<div class="problem-summary">' +
+      '선택하신 <strong>' + pd.length + '개 문제</strong>와 유사한 사례가 총 <strong>' + totalCases.toLocaleString() + '건</strong> 있습니다. ' +
+      '비슷한 수의 문제를 가진 기업들의 평균 시스템 구축 투자 비용은 <strong>' + r.estBudget.toLocaleString() + '만원</strong>입니다.' +
+      '</div>';
 
     document.getElementById('problemCards').innerHTML = html;
   }
 
-  function renderScoreBreakdown(calc) {
-    const mgmtScore = Math.min(100, parseInt(calc.mgmt) * 25);
-    let hoursScore;
-    if (calc.hours <= 2) hoursScore = 100;
-    else if (calc.hours <= 5) hoursScore = 75;
-    else if (calc.hours <= 10) hoursScore = 50;
-    else if (calc.hours <= 20) hoursScore = 25;
-    else hoursScore = 10;
-
-    const hasErpBD = answers.q3.includes('erp');
-    const effectiveScatterBD = hasErpBD ? Math.max(calc.scatter - 1, 0) : calc.scatter;
-    let scatterScore;
-    if (effectiveScatterBD <= 1) scatterScore = 100;
-    else if (effectiveScatterBD <= 2) scatterScore = 70;
-    else if (effectiveScatterBD <= 3) scatterScore = 45;
-    else if (effectiveScatterBD <= 4) scatterScore = 25;
-    else scatterScore = 10;
-
-    let painScore;
-    if (calc.painCount <= 1) painScore = 90;
-    else if (calc.painCount <= 2) painScore = 70;
-    else if (calc.painCount <= 3) painScore = 50;
-    else if (calc.painCount <= 5) painScore = 30;
-    else painScore = 10;
-
-    const orgScore = calc.emp > 20 && mgmtScore < 50 ? 25 : 75;
-    const intentScoreBD = calc.intentScore || 50;
-
-    const dims = [
-      { label: '데이터 관리 수준', weight: '25%', score: mgmtScore },
-      { label: '수기 작업 비중', weight: '20%', score: hoursScore },
-      { label: '데이터 통합도', weight: '20%', score: scatterScore },
-      { label: '업무 고통 수준', weight: '15%', score: painScore },
-      { label: '조직 규모 보정', weight: '10%', score: orgScore },
-      { label: '변화 의지/AI 인식', weight: '10%', score: intentScoreBD }
+  function renderScoreBreakdown(r) {
+    var d = r.dimensions;
+    var dims = [
+      { label: '데이터 관리 수준', weight: '25%', score: d.mgmtScore },
+      { label: '수기 작업 비중', weight: '20%', score: d.hoursScore },
+      { label: '데이터 통합도', weight: '20%', score: d.scatterScore },
+      { label: '업무 고통 수준', weight: '15%', score: d.painScore },
+      { label: '조직 규모 보정', weight: '10%', score: d.orgScore },
+      { label: '변화 의지/AI 인식', weight: '10%', score: d.intentScore }
     ];
 
-    const lowest = dims.reduce((min, d) => d.score < min.score ? d : min, dims[0]);
+    var lowest = dims.reduce(function(min, dd) { return dd.score < min.score ? dd : min; }, dims[0]);
 
-    let html = '';
-    dims.forEach(d => {
-      html += `<div class="breakdown-item">
-        <div class="bd-label">${d.label} <span class="bd-weight">(${d.weight})</span></div>
-        <div class="bd-bar-bg"><div class="bd-bar-fill" style="width: ${d.score}%"></div></div>
-        <div class="bd-score">${d.score}점</div>
-      </div>`;
+    var html = '';
+    dims.forEach(function(dd) {
+      html += '<div class="breakdown-item">' +
+        '<div class="bd-label">' + dd.label + ' <span class="bd-weight">(' + dd.weight + ')</span></div>' +
+        '<div class="bd-bar-bg"><div class="bd-bar-fill" style="width: ' + dd.score + '%"></div></div>' +
+        '<div class="bd-score">' + dd.score + '점</div>' +
+        '</div>';
     });
-    html += `<div class="bd-conclusion">→ 가장 개선이 시급한 영역: <strong>${lowest.label}</strong> (${lowest.score}점)</div>`;
+    html += '<div class="bd-conclusion">→ 가장 개선이 시급한 영역: <strong>' + lowest.label + '</strong> (' + lowest.score + '점)</div>';
 
     document.getElementById('breakdownContent').innerHTML = html;
   }
 
-  function renderBenchmark(score) {
-    const industry = answers.q0;
-    const bm = industryBenchmarks[industry] || { projects: 982, avgBudget: 1773 };
-    const industryName = industryNames[industry] || '업종';
+  function renderBenchmark(r) {
+    var bm = r.benchmark;
+    var score = r.score;
 
-    // [R6] 벤치마크: 임의 "업종 평균 점수"를 제거하고, 실데이터(프로젝트 수/예산)만 표시
-    //      12,257건 위시켓 프로젝트 실데이터 기반
-    let benchmarkHTML = `
-      <h3>${industryName} 업종 시스템 전환 현황</h3>
-      <div class="benchmark-item">
-        <div class="benchmark-label">
-          <span>당신의 업무 시스템 성숙도</span>
-          <span class="benchmark-label-value">${score}점</span>
-        </div>
-        <div class="benchmark-bar">
-          <div class="benchmark-fill" style="width: ${score}%; background: var(--accent);"></div>
-        </div>
-      </div>
-      <div style="display:flex; gap:12px; margin-top:20px;">
-        <div class="result-card" style="flex:1; text-align:center;">
-          <div class="rc-label">같은 업종 전환 프로젝트</div>
-          <div class="rc-value" style="font-size:22px; color:var(--accent);">${bm.projects.toLocaleString()}<span class="won">건</span></div>
-          <div class="rc-detail">12,257건 중 ${industryName} 비중</div>
-        </div>
-        <div class="result-card" style="flex:1; text-align:center;">
-          <div class="rc-label">평균 시스템 구축 예산</div>
-          <div class="rc-value" style="font-size:22px; color:var(--accent);">${bm.avgBudget.toLocaleString()}<span class="won">만원</span></div>
-          <div class="rc-detail">엑셀→웹 전환 프로젝트 기준</div>
-        </div>
-      </div>
-      <div class="benchmark-detail" style="margin-top:12px; text-align:center;">12,257건 IT 외주 프로젝트 전수 분석 기반 (개발곰곰)</div>
-    `;
+    var benchmarkHTML = '<h3>' + bm.industryName + ' 업종 시스템 전환 현황</h3>' +
+      '<div class="benchmark-item">' +
+        '<div class="benchmark-label"><span>당신의 업무 시스템 성숙도</span><span class="benchmark-label-value">' + score + '점</span></div>' +
+        '<div class="benchmark-bar"><div class="benchmark-fill" style="width: ' + score + '%; background: var(--accent);"></div></div>' +
+      '</div>' +
+      '<div style="display:flex; gap:12px; margin-top:20px;">' +
+        '<div class="result-card" style="flex:1; text-align:center;">' +
+          '<div class="rc-label">같은 업종 전환 프로젝트</div>' +
+          '<div class="rc-value" style="font-size:22px; color:var(--accent);">' + bm.projects.toLocaleString() + '<span class="won">건</span></div>' +
+          '<div class="rc-detail">39,425건 중 ' + bm.industryName + ' 비중</div>' +
+        '</div>' +
+        '<div class="result-card" style="flex:1; text-align:center;">' +
+          '<div class="rc-label">평균 시스템 구축 예산</div>' +
+          '<div class="rc-value" style="font-size:22px; color:var(--accent);">' + bm.avgBudget.toLocaleString() + '<span class="won">만원</span></div>' +
+          '<div class="rc-detail">엑셀→웹 전환 프로젝트 기준</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="benchmark-detail" style="margin-top:12px; text-align:center;">39,425건 IT 프로젝트 전수 분석 기반 (개발곰곰)</div>';
 
     document.getElementById('benchmarkSection').innerHTML = benchmarkHTML;
   }
 
-  function renderCases() {
-    const cases = industryCases[answers.q0] || industryCases.other;
-    const section = document.getElementById('casesSection');
-    let html = '';
-    cases.forEach(c => {
-      html += `<div class="case-card">
-        <div class="case-title">${c.title}</div>
-        <div class="case-meta">예산 ${c.budget.toLocaleString()}만원</div>
-        <div class="case-pain">${c.pain}</div>
-      </div>`;
+  function renderCases(r) {
+    var cases = r.cases || [];
+    var section = document.getElementById('casesSection');
+    var html = '';
+    cases.forEach(function(c) {
+      html += '<div class="case-card">' +
+        '<div class="case-title">' + c.title + '</div>' +
+        '<div class="case-meta">예산 ' + c.budget.toLocaleString() + '만원</div>' +
+        '<div class="case-pain">' + c.pain + '</div>' +
+        '</div>';
     });
     document.getElementById('casesContent').innerHTML = html;
     section.style.display = 'block';
@@ -2541,96 +2291,79 @@
     }
   }
 
-  function renderActionItems(calc) {
-    const items = [];
-
-    // Q6(가장 시급한 문제) 기반 맞춤 첫 번째 액션
-    const q6Actions = {
-      manual: '매일 반복하는 수기 입력 업무를 목록으로 만들어보세요. 가장 시간이 많이 드는 것부터 자동화 대상입니다.',
-      scattered: '데이터가 있는 모든 곳(PC, 공유폴더, 메일, 메신저 등)의 목록을 만들어보세요. 통합의 시작점입니다.',
-      errors: '최근 1개월간 데이터 오류로 재확인/수정한 건을 세어보세요. 오류 비용을 체감할 수 있습니다.',
-      reporting: '보고서 하나를 만드는 데 걸리는 시간을 측정해보세요. 데이터 수집-정리-작성 각 단계별로 나누면 자동화 지점이 보입니다.',
-      ai: '현재 시스템에서 가장 많이 쌓이는 데이터가 무엇인지 파악해보세요. AI는 데이터가 있는 곳에서 시작합니다.'
-    };
-    if (q6Actions[answers.q6]) {
-      items.push(q6Actions[answers.q6]);
-    }
-
-    if (calc.hours > 10 && answers.q6 !== 'manual') {
-      items.push('주간 수기 입력 업무 목록을 만들어보세요. 자동화 우선순위를 정하는 첫 걸음입니다.');
-    }
-
-    if (calc.scatter >= 3 && answers.q6 !== 'scattered') {
-      items.push('데이터가 있는 모든 곳의 목록을 만들어보세요. 통합의 시작점입니다.');
-    }
-
-    if (calc.score < 40 && calc.painCount >= 3) {
-      items.push('가장 불편한 업무 하나만 골라보세요. 그 하나를 시스템으로 바꾸는 것부터 시작합니다.');
-    }
-
-    // Fallback items
-    if (items.length === 0) {
-      items.push(
-        '현재 시스템의 자동화 가능 부분을 찾아보세요. 작은 개선들이 모여 큰 효과를 만듭니다.',
-        '팀원들과 현재 업무의 고통점을 공유하고 우선순위를 함께 정해보세요.'
-      );
-    }
-
-    let actionHTML = '<h3>지금 바로 할 수 있는 것</h3>';
-    items.slice(0, 3).forEach((item, idx) => {
-      actionHTML += `
-        <div class="action-item">
-          <div class="action-item-num">Step ${idx + 1}</div>
-          <div class="action-item-text">${item}</div>
-        </div>
-      `;
+  function renderActionItems(r) {
+    var items = r.actionItems || [];
+    var actionHTML = '<h3>지금 바로 할 수 있는 것</h3>';
+    items.forEach(function(item, idx) {
+      actionHTML += '<div class="action-item">' +
+        '<div class="action-item-num">Step ' + (idx + 1) + '</div>' +
+        '<div class="action-item-text">' + item + '</div>' +
+        '</div>';
     });
-
     document.getElementById('actionItems').innerHTML = actionHTML;
   }
 
-  function renderRoadmap(score) {
-    let steps = [];
-
-    if (score <= 30) {
-      steps = [
-        { n: '1', title: '데이터 구조화', desc: '엑셀 데이터를 웹 기반 시스템으로 이전합니다. 입력 폼, 권한 관리, 변경 이력이 자동으로 관리됩니다.', highlight: '지금 가장 필요한 단계', duration: '3-4개월', cost: '5천-1.5억' },
-        { n: '2', title: '업무 자동화', desc: '수기 입력, 알림, 보고서 생성 등 반복 업무를 워크플로우로 자동화합니다.', duration: '2-3개월', cost: '3천-1억' },
-        { n: '3', title: 'AI 에이전트 연동', desc: '구조화된 데이터 위에 AI를 올려, 자연어로 데이터를 조회하고 리포트를 자동 생성합니다.', duration: '2-3개월', cost: '5천-2억' }
-      ];
-    } else if (score <= 55) {
-      steps = [
-        { n: '1', title: '데이터 통합 & 시스템 연동', desc: '분산된 데이터를 한 곳으로 모으고, 기존 시스템과 API로 연동합니다.', highlight: '지금 가장 필요한 단계', duration: '2-3개월', cost: '3천-1억' },
-        { n: '2', title: '워크플로우 자동화', desc: '승인, 알림, 리포트 등 반복 프로세스를 자동화합니다.', duration: '1-2개월', cost: '2천-8천만' },
-        { n: '3', title: 'AI 에이전트 연동', desc: 'AI가 데이터를 읽고 분석하여, 의사결정을 지원합니다.', duration: '2-3개월', cost: '5천-2억' }
-      ];
-    } else {
-      steps = [
-        { n: '1', title: 'AI 파일럿 프로젝트', desc: '가장 효과가 큰 영역 하나를 선정하여 AI를 먼저 적용합니다.', highlight: '지금 시작할 수 있는 단계', duration: '1-2개월', cost: '3천-1억' },
-        { n: '2', title: 'AI 확장 & 고도화', desc: '파일럿 결과를 바탕으로 다른 업무 영역으로 AI를 확대합니다.', duration: '2-3개월', cost: '5천-2억' },
-        { n: '3', title: '완전 자동화', desc: '사람의 개입 없이 AI가 판단하고 실행하는 영역을 넓힙니다.', duration: '3개월+', cost: '5천만원+' }
-      ];
-    }
-
-    let roadmapHTML = '';
-    steps.forEach(s => {
-      const color = s.n === '1' ? 'var(--accent)' : s.n === '2' ? 'var(--yellow)' : 'var(--text-muted)';
-      roadmapHTML += `
-        <div class="roadmap-step">
-          <div class="rs-num" style="background: ${color}22; color: ${color}; border: 2px solid ${color}44;">${s.n}</div>
-          <div class="rs-content">
-            <div class="rs-title">${s.title}</div>
-            <div class="rs-desc">${s.desc}</div>
-            <div class="rs-meta">예상 기간: ${s.duration} | 예상 비용: ${s.cost}</div>
-            ${s.highlight ? `<div class="rs-highlight">→ ${s.highlight}</div>` : ''}
-          </div>
-        </div>
-      `;
+  function renderRoadmap(r) {
+    var steps = r.roadmap || [];
+    var roadmapHTML = '';
+    steps.forEach(function(s) {
+      var color = s.n === '1' ? 'var(--accent)' : s.n === '2' ? 'var(--yellow)' : 'var(--text-muted)';
+      roadmapHTML += '<div class="roadmap-step">' +
+        '<div class="rs-num" style="background: ' + color + '22; color: ' + color + '; border: 2px solid ' + color + '44;">' + s.n + '</div>' +
+        '<div class="rs-content">' +
+          '<div class="rs-title">' + s.title + '</div>' +
+          '<div class="rs-desc">' + s.desc + '</div>' +
+          '<div class="rs-meta">예상 기간: ' + s.duration + ' | 예상 비용: ' + s.cost + '</div>' +
+          (s.highlight ? '<div class="rs-highlight">→ ' + s.highlight + '</div>' : '') +
+        '</div>' +
+        '</div>';
     });
-
     document.getElementById('roadmapSteps').innerHTML = roadmapHTML;
   }
 
+
+  // ── 결과 페이지 HTML 저장/복원 ──
+  var _resultPageHTML = '';
+  document.addEventListener('DOMContentLoaded', function() {
+    var rp = document.getElementById('resultPage');
+    if (rp) _resultPageHTML = rp.innerHTML;
+  });
+
+  function restoreResultHTML() {
+    var rp = document.getElementById('resultPage');
+    if (rp && _resultPageHTML) rp.innerHTML = _resultPageHTML;
+  }
+
+  // ── ROI 카드 렌더링 (신규 고도화) ──
+  function renderROICard(r) {
+    if (!r.roi) return;
+    var card = document.getElementById('roiCard');
+    if (!card) return;
+    card.style.display = 'block';
+    document.getElementById('roiInvestment').innerHTML = r.roi.investmentCost.toLocaleString() + '<span class="won">만원</span>';
+    document.getElementById('roiMonthlySaving').innerHTML = r.roi.monthlySaving.toLocaleString() + '<span class="won">만원/월</span>';
+    document.getElementById('roiMonths').innerHTML = r.roi.roiMonths + '<span class="won">개월</span>';
+    var detail = '시스템 구축 비용 ' + r.roi.investmentCost.toLocaleString() + '만원 투자 시, 월 ' + r.roi.monthlySaving.toLocaleString() + '만원 절감으로 약 ' + r.roi.roiMonths + '개월 만에 회수 가능';
+    document.getElementById('roiDetail').textContent = detail;
+  }
+
+  // ── 매칭 인사이트 & 소규모 기업 인사이트 렌더링 (신규 고도화) ──
+  function renderMatchInsight(r) {
+    var el = document.getElementById('matchInsight');
+    if (!el) return;
+
+    // 소규모 기업 인사이트 우선 표시
+    if (r.smallBizInsight) {
+      el.style.display = 'block';
+      document.getElementById('matchInsightTitle').textContent = '소규모 기업 맞춤 인사이트';
+      document.getElementById('matchInsightText').textContent = r.smallBizInsight.message;
+    } else if (r.benchmark && r.benchmark.matchFailRate > 10) {
+      el.style.display = 'block';
+      document.getElementById('matchInsightTitle').textContent = '외주 매칭 참고 정보';
+      var txt = r.benchmark.industryName + ' 업종의 IT 외주 매칭 실패율은 ' + r.benchmark.matchFailRate + '%입니다.' + (r.benchmark.matchFailExtra || '') + ' 전문가 상담을 통해 적합한 파트너를 찾는 것이 중요합니다.';
+      document.getElementById('matchInsightText').textContent = txt;
+    }
+  }
 
   // ── 개인정보 동의 모달 ──
   const FORM_LINK = 'https://docs.google.com/forms/d/e/1FAIpQLScBfeKRiyAo49CbUUdxfg_2uSxDQVDTo6EW6QmBlltmrpD3Nw/viewform?usp=dialog';
@@ -2716,9 +2449,12 @@
     answers.q6 = null;
     currentStep = 0;
 
+    // 결과 페이지 HTML 복원 후 숨기기
+    restoreResultHTML();
     document.getElementById('resultPage').classList.remove('active');
     document.getElementById('stepIndicator').style.display = 'flex';
     document.getElementById('headerSection').style.display = 'block';
+    apiResult = null;
 
     document.querySelectorAll('.question-card').forEach(q => q.classList.remove('active'));
     document.getElementById('q0').classList.add('active');
@@ -2735,6 +2471,10 @@
     document.getElementById('problemDiagnosis').style.display = 'block';
     document.getElementById('timeLoss').innerHTML = '';
     document.getElementById('aiBridge').style.display = 'none';
+    var roiEl = document.getElementById('roiCard');
+    if (roiEl) roiEl.style.display = 'none';
+    var miEl = document.getElementById('matchInsight');
+    if (miEl) miEl.style.display = 'none';
     // 탭 초기화
     switchTab(0);
 
@@ -2745,7 +2485,6 @@
   }
 
   updateProgress();
-  const hourlyRate = 2.5; // 고용노동부 2024.6 기준
 </script>
 </body>
 </html>
